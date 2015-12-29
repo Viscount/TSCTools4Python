@@ -48,3 +48,7 @@ class Danmaku(object):
     def sender_id(self):
         return self._sender_id
 
+    @property
+    def content(self):
+        return self._content
+
