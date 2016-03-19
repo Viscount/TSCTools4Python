@@ -10,13 +10,17 @@ __author__ = "htwxujian@gmail.com"
 BASE_MODEL = declarative_base()
 
 
+# 数据库表的定义。
+
+
 # 定义movie对象，保存movie的id，标题，以及链接等信息
 class Movie(BASE_MODEL):
     __tablename__ = "movie"
 
     cid = Column(String(30), primary_key=True)  # 视频对应的弹幕cid
-    tag = Column(Text, nullable=True)  # 视频的标签信息，格式为：一级标签\t二级标签...
-    mid = Column(String(30), default=None)  # 视频的id
+    title = Column(Text, nullable=False)  # 视频的标题信息。
+    tags = Column(Text, nullable=False)  # 视频的标签信息，格式为：一级标签\t二级标签...
+    mid = Column(String(30), nullable=False)  # 视频的id
     url = Column(Text, nullable=False)  # 视频的网址链接
 
 
@@ -30,10 +34,10 @@ class Barrage(BASE_MODEL):
     font_size = Column(Integer, nullable=False)  # 字号， 12非常小,16特小,18小,25中,36大,45很大,64特别大
     font_color = Column(String(50), nullable=False)  # 字体的颜色 以HTML颜色的十位数为准
     unix_timestamp = Column(String(50), nullable=False)  # Unix格式的时间戳。基准时间为 1970-1-1 08:00:00
-    pool = Column(String(10), nullable=False)  # 弹幕池 0普通池 1字幕池 2特殊池 【目前特殊池为高级弹幕专用】
+    pool = Column(Integer, nullable=False)  # 弹幕池 0普通池 1字幕池 2特殊池 【目前特殊池为高级弹幕专用】
     sender_id = Column(String(20), nullable=False)  # 发送者的ID，用于“屏蔽此弹幕的发送者”功能
     content = Column(Text, nullable=False)  # 弹幕内容
     # 外键信息
     movie_cid = Column(String(30), ForeignKey("movie.cid"))
     # 这样就可以使用movie.barrages获得该视频的所有弹幕信息。
-    movie = relationship(Movie, backref=backref("barrages", uselist=True))
+    movie = relationship(Movie, backref=backref("barrages", uselist=True, cascade="delete, all"))

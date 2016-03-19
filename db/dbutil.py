@@ -14,22 +14,55 @@ __author__ = "htwxujian@gmail.com"
 
 
 class DBUtil(object):
-    def __init__(self):
-        self.conn_string = "mysql+mysqlconnector://root:18817870106@localhost:3306/ptestdb"
+    # 数据库连接字符串
+    __CONN_STRING = "mysql+mysqlconnector://root:18817870106@localhost:3306/ptestdb"
+    # create a configured "Session" class
+    __SESSION = None
+    __ENGINE = None
 
     # 构建数据库链接
-    def __construct_conn_str(self, db_type, db_driver, db_user_name, db_pass, hostname, port, db_name):
+    @staticmethod
+    def construct_conn_str(db_type, db_driver, db_user_name, db_pass, hostname, port, db_name):
         # '数据库类型+数据库驱动名称://用户名:口令@机器地址:端口号/数据库名'
-        self.conn_string = db_type + "+" + db_driver + "://" + db_user_name + ":" \
-                           + db_pass + "@" + hostname + ":" + str(port) + "/" + db_name
+        __CONN_STRING = db_type + "+" + db_driver + "://" + db_user_name + ":" \
+                        + db_pass + "@" + hostname + ":" + str(port) + "/" + db_name
+        DBUtil.__SESSION = None
+        DBUtil.__ENGINE = None
+
+    @staticmethod
+    def create_engine(conn_str=None):
+        if conn_str is None:
+            conn_str = DBUtil.__CONN_STRING
+        if DBUtil.__ENGINE is None:
+            DBUtil.__ENGINE = create_engine(conn_str)
+        return DBUtil.__ENGINE  # engine对象和session对象都可作用于数据库的增删改查操作。
+
+    # 创建一个配置好的Session类，产生session对象，用于数据库的增删改查。
+    @staticmethod
+    def create_configured_session():
+        if DBUtil.__SESSION is None:
+            engine = DBUtil.create_engine()
+            return sessionmaker(bind=engine)
+        return DBUtil.__SESSION
+
+    # 打开一个新的session，数据库的表创建，增删改查操作都要在session中进行。
+    @staticmethod
+    def open_session():
+        configured_session = DBUtil.create_configured_session()
+        session = configured_session()
+        return session
+
+    @staticmethod
+    def close_session(session):
+        if session is not None:
+            session.close()
 
     # 初始化数据库，创建数据库表等。
-    def init_db(self):
-        engine = create_engine(self.conn_string)
-        session = sessionmaker()
-        session.configure(bind=engine)
+    @staticmethod
+    def init_db():
+        # 创建对应的数据库表。
+        engine = DBUtil.create_engine()
         BASE_MODEL.metadata.create_all(engine)
-
 
 if __name__ == "__main__":
     db_util = DBUtil()

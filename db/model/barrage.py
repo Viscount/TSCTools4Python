@@ -25,4 +25,4 @@ class Barrage(BASE_MODEL):
     # 外键信息
     movie_cid = Column(String, ForeignKey("movie.cid"))
     # 这样就可以使用movie.barrages获得该视频的所有弹幕信息。
-    movie = relationship(Movie, backref=backref("barrages", uselist=True))
+    movie = relationship(Movie, backref=backref("barrages", uselist=True, cascade="delete, all"))
