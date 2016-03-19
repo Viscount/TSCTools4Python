@@ -6,6 +6,12 @@ import urllib
 import urllib2
 import zlib
 
+"""
+提供爬虫类使用到的一些基本方法。
+"""
+
+__author__ = "htwxujian@gmail.com"
+
 
 class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
     def __init__(self):
