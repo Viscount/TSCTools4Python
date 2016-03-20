@@ -6,6 +6,8 @@ import urllib
 import urllib2
 import zlib
 
+from util.consoleutil import ConsoleUtil
+
 """
 提供爬虫类使用到的一些基本方法。
 """
@@ -34,7 +36,8 @@ class BarrageSpider(object):
     def __init__(self):
         self.post_data = {}
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko)' +
+                          ' Chrome/48.0.2564.116 Safari/537.36',
             'Accept-Encoding': 'gzip, deflate, zlib, sdch'
         }
         self.timeout = 60
@@ -55,13 +58,13 @@ class BarrageSpider(object):
                 return False
         except Exception as exception:
             print exception
-            self.print_console_info(u"连接失败！" + unicode(str(try_times)) + u" ，正在重新连接……")
+            ConsoleUtil.print_console_info(u"连接失败！" + unicode(str(try_times)) + u" ，正在重新连接……")
             self.__access_url_internal(req, timeout, try_times + 1)
 
     def __access_url(self, req, timeout=60):
         resp = self.__access_url_internal(req, timeout)
         if resp is False:
-            self.print_console_info(u"无法连接：" + unicode(req.get_full_url()))
+            ConsoleUtil.print_console_info(u"无法连接：" + unicode(req.get_full_url()))
             return None
         else:
             return resp
@@ -77,7 +80,7 @@ class BarrageSpider(object):
         page_html = resp.read()
         resp_info = resp.info()
         if "Content-Encoding" in resp_info:
-            self.print_console_info(
+            ConsoleUtil.print_console_info(
                 u"网页：" + unicode(resp.url) + u"\t压缩格式： " + unicode(resp_info["Content-Encoding"]))
             try:
                 if resp_info["Content-Encoding"] == "deflate":
@@ -90,20 +93,11 @@ class BarrageSpider(object):
                 print e
                 return None
         page_html = page_html.decode("utf-8", "ignore")
-        print page_html
         return page_html
-
-    @classmethod
-    def print_console_info(cls, unicode_str_msg):
-        if unicode_str_msg is None:
-            print None
-        else:
-            print unicode_str_msg
-            # print unicode_str_msg.encode(cls.FILESYSTEMENCODING, "ignore")
 
 
 if __name__ == "__main__":
     bSpider = BarrageSpider()
     # url = "http://comment.bilibili.tv/6461569.xml"
     url = "http://www.bilibili.com/video/av4122999/"
-    bSpider.print_console_info(bSpider.get_html_content(url))
+    ConsoleUtil.print_console_info(bSpider.get_html_content(url))
