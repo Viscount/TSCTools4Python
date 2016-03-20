@@ -34,9 +34,8 @@ class BarrageSpider(object):
     def __init__(self):
         self.post_data = {}
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-                          'Chrome/48.0.2564.116 Safari/537.36',
-            'Accept-Encoding': 'gzip, deflate, zlib'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
+            'Accept-Encoding': 'gzip, deflate, zlib, sdch'
         }
         self.timeout = 60
         self.try_times = 5
@@ -80,12 +79,16 @@ class BarrageSpider(object):
         if "Content-Encoding" in resp_info:
             self.print_console_info(
                 u"网页：" + unicode(resp.url) + u"\t压缩格式： " + unicode(resp_info["Content-Encoding"]))
-            if resp_info["Content-Encoding"] == "deflate":
-                page_html = zlib.decompress(page_html, -zlib.MAX_WBITS)
-            elif resp_info["Content-Encoding"] == "gzip":
-                page_html = zlib.decompress(page_html, zlib.MAX_WBITS | 16)
-            elif resp_info["Content-Encoding"] == "zlib":
-                page_html = zlib.decompress(page_html, zlib.MAX_WBITS)
+            try:
+                if resp_info["Content-Encoding"] == "deflate":
+                    page_html = zlib.decompress(page_html, -zlib.MAX_WBITS)
+                elif resp_info["Content-Encoding"] == "gzip":
+                    page_html = zlib.decompress(page_html, zlib.MAX_WBITS | 16)
+                elif resp_info["Content-Encoding"] == "zlib":
+                    page_html = zlib.decompress(page_html, zlib.MAX_WBITS)
+            except zlib.error as e:
+                print e
+                return None
         page_html = page_html.decode("utf-8", "ignore")
         return page_html
 
@@ -100,5 +103,6 @@ class BarrageSpider(object):
 
 if __name__ == "__main__":
     bSpider = BarrageSpider()
-    url = "http://comment.bilibili.tv/6461569.xml"
+    # url = "http://comment.bilibili.tv/6461569.xml"
+    url = "http://www.bilibili.com/video/av4122999/"
     bSpider.print_console_info(bSpider.get_html_content(url))

@@ -14,8 +14,8 @@ BASE_MODEL = declarative_base()
 
 
 # 定义movie对象，保存movie的id，标题，以及链接等信息
-class Movie(BASE_MODEL):
-    __tablename__ = "movie"
+class Video(BASE_MODEL):
+    __tablename__ = "video"
 
     cid = Column(String(30), primary_key=True)  # 视频对应的弹幕cid
     title = Column(Text, nullable=False)  # 视频的标题信息。
@@ -38,6 +38,6 @@ class Barrage(BASE_MODEL):
     sender_id = Column(String(20), nullable=False)  # 发送者的ID，用于“屏蔽此弹幕的发送者”功能
     content = Column(Text, nullable=False)  # 弹幕内容
     # 外键信息
-    movie_cid = Column(String(30), ForeignKey("movie.cid"))
+    video_cid = Column(String(30), ForeignKey("video.cid"))
     # 这样就可以使用movie.barrages获得该视频的所有弹幕信息。
-    movie = relationship(Movie, backref=backref("barrages", uselist=True, cascade="delete, all"))
+    video = relationship(Video, backref=backref("barrages", uselist=True, cascade="delete, all"))

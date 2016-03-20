@@ -1,20 +1,23 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
+from contextlib import contextmanager
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from db.model import BASE_MODEL
 
 """
-数据库操作模块
+数据库操作模块，提供连接数据库，打开session等数据库操作的基本方法。
 """
 
 __author__ = "htwxujian@gmail.com"
 
 
 class DBUtil(object):
-    # 数据库连接字符串
+    # 数据库连接字符串，由于弹幕中常常含有特殊的字符串，因此可能需要 ?charset=utf8mb4 来解决，待解决。
+    # 参考链接：http://docs.sqlalchemy.org/en/latest/dialects/mysql.html#dialect-mysql
     __CONN_STRING = "mysql+mysqlconnector://root:18817870106@localhost:3306/ptestdb"
     # create a configured "Session" class
     __SESSION = None
@@ -34,7 +37,7 @@ class DBUtil(object):
         if conn_str is None:
             conn_str = DBUtil.__CONN_STRING
         if DBUtil.__ENGINE is None:
-            DBUtil.__ENGINE = create_engine(conn_str)
+            DBUtil.__ENGINE = create_engine(conn_str, echo=True)
         return DBUtil.__ENGINE  # engine对象和session对象都可作用于数据库的增删改查操作。
 
     # 创建一个配置好的Session类，产生session对象，用于数据库的增删改查。
@@ -52,9 +55,24 @@ class DBUtil(object):
         session = configured_session()
         return session
 
+    # 关闭之前新建立的session。
     @staticmethod
     def close_session(session):
         if session is not None:
+            session.close()
+
+    @staticmethod
+    @contextmanager
+    def my_scoped_session():
+        """Provide a transactional scope around a series of operations."""
+        session = DBUtil.create_configured_session()
+        try:
+            yield session
+            session.commit()
+        except Exception as e:
+            print e
+            session.rollback()
+        finally:
             session.close()
 
     # 初始化数据库，创建数据库表等。

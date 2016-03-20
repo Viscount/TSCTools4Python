@@ -13,6 +13,7 @@ class Movie(BASE_MODEL):
     __tablename__ = "movie"
 
     cid = Column(String(30), primary_key=True)  # 视频对应的弹幕cid
-    tag = Column(Text, nullable=True)  # 视频的标签信息，格式为：一级标签\t二级标签...
-    mid = Column(String(30), default=None)  # 视频的id
+    title = Column(Text, nullable=False)  # 视频的标题信息。
+    tags = Column(Text, nullable=False)  # 视频的标签信息，格式为：一级标签\t二级标签...
+    mid = Column(String(30), nullable=False)  # 视频的id
     url = Column(Text, nullable=False)  # 视频的网址链接
