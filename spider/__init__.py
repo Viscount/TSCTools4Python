@@ -90,6 +90,7 @@ class BarrageSpider(object):
                 print e
                 return None
         page_html = page_html.decode("utf-8", "ignore")
+        print page_html
         return page_html
 
     @classmethod

@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
+import codecs
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine
@@ -16,9 +17,9 @@ __author__ = "htwxujian@gmail.com"
 
 
 class DBUtil(object):
-    # 数据库连接字符串，由于弹幕中常常含有特殊的字符串，因此可能需要 ?charset=utf8mb4 来解决，待解决。
+    # 数据库连接字符串，由于弹幕中常常含有特殊的字符串，因此可能需要 ?charset=utf8mb4 来解决。
     # 参考链接：http://docs.sqlalchemy.org/en/latest/dialects/mysql.html#dialect-mysql
-    __CONN_STRING = "mysql+mysqlconnector://root:18817870106@localhost:3306/ptestdb"
+    __CONN_STRING = "mysql+mysqlconnector://root:18817870106@localhost:3306/ptestdb?charset=utf8mb4&use_unicode=0"
     # create a configured "Session" class
     __SESSION = None
     __ENGINE = None
@@ -37,6 +38,8 @@ class DBUtil(object):
         if conn_str is None:
             conn_str = DBUtil.__CONN_STRING
         if DBUtil.__ENGINE is None:
+            # engine 作为编程语言与数据库的接口，conn_str 中需要一致 数据库与 编程语言的字符编码，这样才不会出现乱码。这里双方都是
+            # utf8mb4
             DBUtil.__ENGINE = create_engine(conn_str, echo=True)
         return DBUtil.__ENGINE  # engine对象和session对象都可作用于数据库的增删改查操作。
 
@@ -78,6 +81,10 @@ class DBUtil(object):
     # 初始化数据库，创建数据库表等。
     @staticmethod
     def init_db():
+        # 数据库包装这一层，存在大量的encode操作，使用的是database的charset，在数据库端指定了使用utf8mb4编码，那么外部模块与
+        # 数据库连接时，要使用相同的编码，修改数据库数据时也应该使用相同的编码。
+        # 而Python的codec模块不知道utf8mb4这种表述，所以需要使用别名。make python understand 'utf8mb4' as an alias for 'utf8'。
+        codecs.register(lambda name: codecs.lookup('utf8') if name == 'utf8mb4' else None)
         # 创建对应的数据库表。
         engine = DBUtil.create_engine()
         BASE_MODEL.metadata.create_all(engine)

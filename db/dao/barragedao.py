@@ -26,6 +26,7 @@ class BarrageDao(object):
         video = VideoDao.get_video_by_cid(cid)
         if video is None:
             return False
+        # 批量存储数据库记录。
         session = DBUtil.open_session()
         try:
             for barrage in barrages:
@@ -34,6 +35,28 @@ class BarrageDao(object):
                             content=barrage[8])
                 b.video = video
                 session.add(b)
+            session.commit()
+            return True
+        except Exception as e:
+            print e
+            session.rollback()
+            return False
+        finally:
+            DBUtil.close_session(session)
+
+    @staticmethod
+    def add_barrage(play_timestamp, type, font_size, font_color, unix_timestamp, pool, sender_id, row_id, content, cid):
+        video = VideoDao.get_video_by_cid(cid)
+        if video is None:
+            return False
+        barrage = Barrage(play_timestamp=play_timestamp, type=type, font_size=font_size, font_color=font_color,
+                          unix_timestamp=unix_timestamp, pool=pool, sender_id=sender_id,
+                          row_id=row_id, content=content)
+        barrage.video = video
+        print barrage.content  # 调试信息
+        session = DBUtil.open_session()
+        try:
+            session.add(barrage)
             session.commit()
             return True
         except Exception as e:

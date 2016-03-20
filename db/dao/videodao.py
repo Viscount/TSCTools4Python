@@ -47,4 +47,5 @@ class VideoDao(DBUtil):
 
 
 if __name__ == "__main__":
-    print VideoDao.get_video_by_cid("6665985")
+    video = VideoDao.get_video_by_cid("6671044")
+    print video.title
