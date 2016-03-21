@@ -1,8 +1,11 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
+import argparse
 import codecs
+import os
 import re
+from multiprocessing import Pool
 
 from db.dao.barragedao import BarrageDao
 from db.dao.videodao import VideoDao
@@ -164,9 +167,37 @@ class BilibiliSpider(BarrageSpider):
         self.save_barrages_to_local(cid, barrages)
 
 
+# 爬取弹幕的任务函数
+def grab_barrage_task(video_url):
+    ConsoleUtil.print_console_info(u"子进程id：%s，抓取网页：%s。开始……" % (os.getpid(), video_url))
+    bili_spider = BilibiliSpider()
+    bili_spider.start(video_url)
+    ConsoleUtil.print_console_info(u"子进程id：%s，抓取网页：%s。结束……" % (os.getpid(), video_url))
+
+
+# 爬虫主函数，创建多个进程对多个video站点的弹幕信息进行抓取。
+def main():
+    arg_parser = argparse.ArgumentParser(u"BilibiliSpider", description=u"grabs the barrages from bilibili video" +
+                                                                        u" and store barrages to db.")
+    arg_parser.add_argument("-u", "-urls", required=False, metavar="BILIBILI_VIDEO_URLS", default=[], dest="video_urls",
+                            help="the bilibili video urls.")
+    arg_parser.add_argument("-i", "--internal", required=False, metavar="INTERNAL_TIME", default=5,
+                            dest="internal_time",
+                            help="the internal minute for grabing the bilibili barrages")
+    opts = arg_parser.parse_args()
+    video_urls = opts.video_urls;  # 获得url的list列表。
+
+    # 测试内容
+    video_urls = ["http://www.bilibili.com/video/av4119682/", "http://www.bilibili.com/video/av4130482/"]
+
+    ConsoleUtil.print_console_info(u"开始抓取弹幕信息。\n父进程id：%s" % os.getpid())
+    pool = Pool()
+    for video_url in video_urls:
+        pool.apply_async(grab_barrage_task, args=(video_url,))
+    pool.close()
+    pool.join()
+    ConsoleUtil.print_console_info(u"弹幕信息抓取结束！")
+
+
 if __name__ == "__main__":
-    bSpider = BilibiliSpider()
-    # video_url = "http://www.bilibili.com/video/av4128614/?tg"  # 为毛直接爬这个网页会爬到主页的内容，刚刚明明不会的。
-    # video_url = "http://www.bilibili.com/video/av4119682/"
-    video_url = "http://www.bilibili.com/video/av4130482/"
-    bSpider.start(video_url)
+    main()

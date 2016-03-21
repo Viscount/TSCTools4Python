@@ -10,6 +10,7 @@
 >
 1. mysql版本 >= 5.5.3
 2. mysqldb 版本 >= 1.2.5
+
 _原因：由于弹幕数据中包含大量的特殊unicode字符，需要使用mysql中的utf8mb4编码方式存储（完全支持全部的unicode字符串），而mysql的5.5.3
 版本及以上，mysqldb的1.2.5版本及以上支持utf8mb4编码。_
 
@@ -43,6 +44,7 @@ _barrage_表结构：
 ```
 
 **4. 关于本地弹幕xml文件的解析**
+
 调用```db.dao.bilibili_xml_parser.BilibiliXmlParser```中的```save_xml_barrage_to_db(xml_file_path)```方法。该方法返回True时，数据库操作成功。
 _注：_
 > ```xml_file_path``` 参数必须是 以 (\d)+.xml结尾的字符串，否则xml文件中的弹幕无法存入数据库。
