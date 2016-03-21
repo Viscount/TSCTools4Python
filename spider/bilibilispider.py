@@ -53,8 +53,8 @@ class BilibiliSpider(BarrageSpider):
         return cid
 
     # 获得视频的id信息。
-    def get_video_id(self, video_url):
-        pattern = re.compile(r'http://.*?/.*?/(.*?)/.*?', re.S)
+    def get_video_aid(self, video_url):
+        pattern = re.compile(r'http://.*?/.*?/av(.*?)/.*?', re.S)
         match = re.search(pattern, video_url)
         if match is None:
             return None
@@ -148,7 +148,7 @@ class BilibiliSpider(BarrageSpider):
         # 视频网页的html源码信息。
         video_html_content = self.get_html_content(video_url)
         # 获得视频的相关信息
-        mid = self.get_video_id(video_url)
+        mid = self.get_video_aid(video_url)
         cid = self.get_video_cid(video_html_content)
         tags = self.get_video_tags(video_html_content)
         title = self.get_video_title(video_html_content)

@@ -16,8 +16,8 @@ class VideoDao(DBUtil):
     DBUtil.init_db()
 
     @staticmethod
-    def add_video(cid, title, tags, mid, url):
-        video = Video(cid=cid, title=title, tags=tags, mid=mid, url=url)
+    def add_video(cid, title, tags, aid, url):
+        video = Video(cid=cid, title=title, tags=tags, aid=aid, url=url)
         session = DBUtil.open_session()
         try:
             session.add(video)
