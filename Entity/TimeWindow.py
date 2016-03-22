@@ -9,8 +9,11 @@ class TimeWindow(object):
         self.index = index
         self.startSecond = start
         self.endSecond = end
+        self.users = []
         self.userFeature = dict()
 
-    def buildUserFeature(self):
-        pass
+    def buildUsers(self, userList):
+        self.users = userList
 
+    def buildUserFeature(self, user_feature):
+        self.userFeature = user_feature
