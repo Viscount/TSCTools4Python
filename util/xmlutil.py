@@ -7,6 +7,8 @@ except ImportError:
     import xml.etree.ElementTree as ET
 from Entity.Danmaku import Danmaku
 
+__author__ = 'Liao Zhenyu'
+
 
 def getDanmakuListFromFile(file_path):
     tree = ET.ElementTree(file=file_path)
@@ -16,6 +18,6 @@ def getDanmakuListFromFile(file_path):
         content = element.text
         danmaku = Danmaku(attr, content)
         danmakuList.append(danmaku)
-    return danmakuList
+    return sorted(danmakuList, key=lambda danmaku: danmaku.videoSecond)
 
 
