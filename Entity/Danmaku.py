@@ -8,7 +8,7 @@ class Danmaku(object):
     def __init__(self, param_string, content):
         self.content = content
         paramList = param_string.split(",")
-        self.videoSecond = paramList[0]
+        self.videoSecond = float(paramList[0])
         self.mode = paramList[1]
         self.fontSize = paramList[2]
         self.color = paramList[3]

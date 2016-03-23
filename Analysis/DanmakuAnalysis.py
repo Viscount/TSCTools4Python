@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 from util import constants
-from Entity import TimeWindow
+from Entity.TimeWindow import TimeWindow
 from util import xmlutil
 from util import danmakuutil
 from util import simutil
