@@ -21,5 +21,4 @@ def check_cont(content):
         if re.match(pattern,content) is not None:
             new_content = library.REPLACE_DICT[item]
             return new_content
-        else:
-            return content
+    return content

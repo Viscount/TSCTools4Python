@@ -32,6 +32,8 @@ def extract_user_feature(danmaku_list):
     user_feature = dict()
     for danmaku in danmaku_list:
         word_list = WordSegment.wordSegment(danmaku.content)
+        if len(word_list) == 0:
+            continue
         word_dict = dict()
         for word in word_list:
             if word.content in word_dict:

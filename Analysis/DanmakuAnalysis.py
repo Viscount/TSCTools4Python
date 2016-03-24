@@ -6,6 +6,7 @@ from Entity.TimeWindow import TimeWindow
 from util import xmlutil
 from util import danmakuutil
 from util import simutil
+import jieba
 import numpy as np
 import os
 
@@ -64,6 +65,7 @@ def generateMatrix(time_window):
 if __name__ == "__main__":
     danmakuList = getDataSource(constants.DATASOURCE)
     constants.USERID = danmakuutil.extract_users(danmakuList)
+    jieba.load_userdict(constants.USER_DICT_PATH)
     windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH)
     for time_window in windowList:
         matrix = generateMatrix(time_window)
