@@ -17,10 +17,13 @@ class VideoDao(DBUtil):
 
     @staticmethod
     def add_video(cid, title, tags, aid, url):
-        video = Video(cid=cid, title=title, tags=tags, aid=aid, url=url)
+        print "video info before"
+        print cid, title, tags, aid, url
+        video_info = Video(cid=cid, title=title, tags=tags, aid=aid, url=url)
+        print "video info after"
         session = DBUtil.open_session()
         try:
-            session.add(video)
+            session.add(video_info)
             session.commit()
             return True
         except Exception as e:
@@ -47,5 +50,5 @@ class VideoDao(DBUtil):
 
 
 if __name__ == "__main__":
-    video = VideoDao.get_video_by_cid("6671044")
+    video = VideoDao.get_video_by_cid("6684033")
     print video.title
