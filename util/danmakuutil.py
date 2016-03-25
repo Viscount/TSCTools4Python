@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 from Entity import Danmaku
+from util import consoleutil as console
 import WordSegment
 
 __author__ = 'Liao Zhenyu'
@@ -31,6 +32,9 @@ def merge_word_dict(old_word_dict, new_word_dict):
 def extract_user_feature(danmaku_list):
     user_feature = dict()
     for danmaku in danmaku_list:
+        if danmaku.content is None:
+            continue
+        console.ConsoleUtil.print_console_info("start parsing sentence "+danmaku.content)
         word_list = WordSegment.wordSegment(danmaku.content)
         if len(word_list) == 0:
             continue

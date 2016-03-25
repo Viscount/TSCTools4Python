@@ -6,6 +6,7 @@ from Entity.TimeWindow import TimeWindow
 from util import xmlutil
 from util import danmakuutil
 from util import simutil
+from util import consoleutil as console
 import jieba
 import numpy as np
 import os
@@ -15,8 +16,10 @@ __author__ = 'Liao Zhenyu'
 
 def getDataSource(method):
     if method == "xml":
+        console.ConsoleUtil.print_console_info("Get data from xml files at " + constants.FILE_PATH)
         return xmlutil.getDanmakuListFromFile(constants.FILE_PATH)
     elif method == "database":
+        console.ConsoleUtil.print_console_info("Get data from database")
         pass
     else:
         raise ValueError("数据源参数错误")
@@ -32,6 +35,7 @@ def buildWindow(danmaku_list, window_size, step_length):
         if danmaku.videoSecond <= current_end:
             current_danmaku.append(danmaku)
         else:
+            console.ConsoleUtil.print_console_info("Building time window " + str(current_index) + "...")
             time_window = TimeWindow(current_index, current_start, current_end)
             time_window.buildUsers(danmakuutil.extract_users(current_danmaku))
             time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku))
@@ -64,10 +68,11 @@ def generateMatrix(time_window):
 
 if __name__ == "__main__":
     danmakuList = getDataSource(constants.DATASOURCE)
-    constants.USERID = danmakuutil.extract_users(danmakuList)
+    constants.USERID = list(danmakuutil.extract_users(danmakuList))
     jieba.load_userdict(constants.USER_DICT_PATH)
     windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH)
     for time_window in windowList:
+        console.ConsoleUtil.print_console_info("Start generating matrix" + str(time_window.index) + "...")
         matrix = generateMatrix(time_window)
         matrix_file_name = "matrix"+time_window.index+".txt"
         matrix.dump(os.join(constants.DUMP_PATH, matrix_file_name))
