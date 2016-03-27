@@ -55,14 +55,20 @@ def buildWindow(danmaku_list, window_size, step_length):
 def generateMatrix(time_window):
     user_num = len(constants.USERID)
     cmatrix = np.zeros((user_num, user_num))
+    count = 0
     for user in time_window.users:
         for com_user in time_window.users:
             index1 = constants.USERID.index(user)
             index2 = constants.USERID.index(com_user)
-            feature1 = time_window.userFeature[user]
-            feature2 = time_window.userFeature[com_user]
-            cmatrix[index1, index2] = simutil.word_frequency_sim(feature1, feature2)
-            cmatrix[index2, index1] = cmatrix[index1, index2]
+            feature1 = time_window.userFeature.get(user)
+            feature2 = time_window.userFeature.get(com_user)
+            if feature1 is not None and feature2 is not None:
+                sim = simutil.word_frequency_sim(feature1, feature2)
+                if sim > 0:
+                    count += 1
+                cmatrix[index1, index2] = sim
+                cmatrix[index2, index1] = sim
+    print count
     return cmatrix
 
 
@@ -74,5 +80,6 @@ if __name__ == "__main__":
     for time_window in windowList:
         console.ConsoleUtil.print_console_info("Start generating matrix" + str(time_window.index) + "...")
         matrix = generateMatrix(time_window)
-        matrix_file_name = "matrix"+time_window.index+".txt"
-        matrix.dump(os.join(constants.DUMP_PATH, matrix_file_name))
+        matrix_file_name = "matrix"+str(time_window.index)+".txt"
+        with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:
+            np.savetxt(f, matrix, fmt='%.2f', newline='\n')
