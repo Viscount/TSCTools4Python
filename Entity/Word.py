@@ -16,3 +16,9 @@ class Word(object):
     @property
     def pos(self):
         return self._pos
+
+    def word2dict(self):
+        return{
+            'content': self._content,
+            'pos': self._pos
+        }

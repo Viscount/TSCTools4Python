@@ -9,3 +9,4 @@ STEP_LENGTH = 10
 USERID = []
 DUMP_PATH = "..\\data\\matrix\\"
 USER_DICT_PATH = "..\\WordSegment\\user_dict.txt"
+PARSE_LOG = "..\\data\\parseLog.txt"

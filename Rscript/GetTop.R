@@ -1,7 +1,7 @@
 n = 2497
-CmatrixNum = 618
+CmatrixNum = 615
 WindowSize = 3
-num = 1
+num = 20
 zArraywithPos = array(0,dim=c(CmatrixNum,2))
 for ( i in 1:CmatrixNum){
   zArraywithPos[i,]=c(i,zArray[i])
