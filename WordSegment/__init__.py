@@ -19,7 +19,7 @@ def wordSegment(sentence):
         for result in results:
             word = Word(filter.check_cont(result.word), result.flag)
             f.write(json.dumps(word, encoding='UTF-8', default=Word.word2dict, ensure_ascii=False)+" ")
-            if filter.check_flag(word.pos):
+            if filter.check_refuse_flag(word.pos):
                 words.append(word)
         f.writelines("\n")
     return words

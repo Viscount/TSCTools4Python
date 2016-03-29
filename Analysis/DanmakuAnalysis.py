@@ -31,25 +31,32 @@ def buildWindow(danmaku_list, window_size, step_length):
     current_end = current_start + window_size
     current_danmaku = []
     current_index = 0
-    for danmaku in danmaku_list:
-        if danmaku.videoSecond <= current_end:
-            current_danmaku.append(danmaku)
-        else:
-            console.ConsoleUtil.print_console_info("Building time window " + str(current_index) + "...")
-            time_window = TimeWindow(current_index, current_start, current_end)
-            time_window.buildUsers(danmakuutil.extract_users(current_danmaku))
-            time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku))
-            window_list.append(time_window)
-            current_index += 1
-            current_start += step_length
-            current_end = current_start + window_size
-            current_danmaku = [danmaku]
-    if len(current_danmaku) > 0:
+    while current_start < danmaku_list[-1].videoSecond:
+        console.ConsoleUtil.print_console_info("Building time window " + str(current_index) + "...")
+        for danmaku in danmaku_list:
+            if current_start <= danmaku.videoSecond <= current_end:
+                current_danmaku.append(danmaku)
+            elif danmaku.videoSecond > current_end:
+                break
         time_window = TimeWindow(current_index, current_start, current_end)
         time_window.buildUsers(danmakuutil.extract_users(current_danmaku))
+        time_window.buildTSCs(len(current_danmaku))
         time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku))
         window_list.append(time_window)
+
+        current_index += 1
+        current_start += step_length
+        current_danmaku = []
+        current_end = current_start + window_size
+
     return window_list
+
+
+def getStatistics(window_list):
+    with open(constants.STATISTIC_LOG+"numOfTsc.txt", "w") as f:
+        for time_window in window_list:
+            f.write(str(time_window.tsc_num))
+            f.write(" ")
 
 
 def generateMatrix(time_window):
@@ -77,9 +84,10 @@ if __name__ == "__main__":
     constants.USERID = list(danmakuutil.extract_users(danmakuList))
     jieba.load_userdict(constants.USER_DICT_PATH)
     windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH)
-    for time_window in windowList:
-        console.ConsoleUtil.print_console_info("Start generating matrix" + str(time_window.index) + "...")
-        matrix = generateMatrix(time_window)
-        matrix_file_name = "matrix"+str(time_window.index)+".txt"
-        with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:
-            np.savetxt(f, matrix, fmt='%.2f', newline='\n')
+    getStatistics(windowList)
+    # for time_window in windowList:
+    #     console.ConsoleUtil.print_console_info("Start generating matrix" + str(time_window.index) + "...")
+    #     matrix = generateMatrix(time_window)
+    #     matrix_file_name = "matrix"+str(time_window.index)+".txt"
+    #     with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:
+    #         np.savetxt(f, matrix, fmt='%.2f', newline='\n')

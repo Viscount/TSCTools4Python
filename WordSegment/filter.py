@@ -8,11 +8,18 @@ import re
 __author__ = 'Liao Zhenyu'
 
 
-def check_flag(flag):
+def check_accept_flag(flag):
     if flag[0] in library.ACCEPTABLE_FLAG:
         return True
     else:
         return False
+
+
+def check_refuse_flag(flag):
+    if flag[0] in library.REFUSE_FLAG:
+        return False
+    else:
+        return True
 
 
 def check_cont(content):
