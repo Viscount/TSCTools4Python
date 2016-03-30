@@ -85,9 +85,9 @@ if __name__ == "__main__":
     jieba.load_userdict(constants.USER_DICT_PATH)
     windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH)
     getStatistics(windowList)
-    # for time_window in windowList:
-    #     console.ConsoleUtil.print_console_info("Start generating matrix" + str(time_window.index) + "...")
-    #     matrix = generateMatrix(time_window)
-    #     matrix_file_name = "matrix"+str(time_window.index)+".txt"
-    #     with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:
-    #         np.savetxt(f, matrix, fmt='%.2f', newline='\n')
+    for time_window in windowList:
+        console.ConsoleUtil.print_console_info("Start generating matrix" + str(time_window.index) + "...")
+        matrix = generateMatrix(time_window)
+        matrix_file_name = "matrix"+str(time_window.index)+".txt"
+        with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:
+            np.savetxt(f, matrix, fmt='%.2f', newline='\n')

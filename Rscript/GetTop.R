@@ -1,5 +1,5 @@
 n = 2497
-CmatrixNum = 615
+CmatrixNum = 618
 WindowSize = 3
 num = 20
 zArraywithPos = array(0,dim=c(CmatrixNum,2))

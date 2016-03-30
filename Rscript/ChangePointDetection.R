@@ -1,5 +1,5 @@
 n = 2497
-CmatrixNum = 615
+CmatrixNum = 618
 WindowSize = 3
 eigenArray = array(0,dim = c(n,CmatrixNum))
 zArray = array(0,dim = CmatrixNum)
