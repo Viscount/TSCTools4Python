@@ -98,6 +98,6 @@ class BarrageSpider(object):
 
 if __name__ == "__main__":
     bSpider = BarrageSpider()
-    # url = "http://comment.bilibili.tv/6461569.xml"
-    url = "http://www.bilibili.com/video/av4122999/"
+    url = "http://comment.bilibili.tv/6461569.xml"
+    # url = "http://www.bilibili.com/video/av4122999/"
     ConsoleUtil.print_console_info(bSpider.get_html_content(url))

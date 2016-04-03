@@ -148,15 +148,20 @@ class BilibiliSpider(BarrageSpider):
 
     # 抓取网页的视频以及弹幕信息。
     def start(self, video_url):
+        print u"进入start函数。"
         # 视频网页的html源码信息。
         video_html_content = self.get_html_content(video_url)
+        if video_html_content is None:
+            # 说明网络连接可能有问题，导致无法获得网页源码。
+            ConsoleUtil.print_console_info(u"无法获得网页html代码，请检查网址是否输入正确，或检查网络连接是否正常！！")
+            return None
         # 获得视频的相关信息
-        mid = self.get_video_aid(video_url)
+        aid = self.get_video_aid(video_url)
         cid = self.get_video_cid(video_html_content)
         tags = self.get_video_tags(video_html_content)
         title = self.get_video_title(video_html_content)
         # 将视频信息存储入数据库中
-        VideoDao.add_video(cid, title, tags, mid, unicode(video_url))
+        VideoDao.add_video(cid, title, tags, aid, unicode(video_url))
         # 获取弹幕信息。
         barrages = self.get_row_video_barrage(self.barrage_xml_url(cid))
         # 获取更新的弹幕信息。
@@ -179,20 +184,19 @@ def grab_barrage_task(video_url):
 def main():
     arg_parser = argparse.ArgumentParser(u"BilibiliSpider", description=u"grabs the barrages from bilibili video" +
                                                                         u" and store barrages to db.")
-    arg_parser.add_argument("-u", "-urls", required=False, metavar="BILIBILI_VIDEO_URLS", default=[], dest="video_urls",
+    arg_parser.add_argument("-u", "-urls", required=False, action="append", metavar="BILIBILI_VIDEO_URLS", default=[], dest="video_urls",
                             help="the bilibili video urls.")
     arg_parser.add_argument("-i", "--internal", required=False, metavar="INTERNAL_TIME", default=5,
                             dest="internal_time",
                             help="the internal minute for grabing the bilibili barrages")
     opts = arg_parser.parse_args()
-    video_urls = opts.video_urls;  # 获得url的list列表。
-
-    # 测试内容
-    video_urls = ["http://www.bilibili.com/video/av4119682/", "http://www.bilibili.com/video/av4130482/"]
+    video_urls = opts.video_urls  # 获得url的list列表。
+    print video_urls
 
     ConsoleUtil.print_console_info(u"开始抓取弹幕信息。\n父进程id：%s" % os.getpid())
     pool = Pool()
     for video_url in video_urls:
+        print video_url
         pool.apply_async(grab_barrage_task, args=(video_url,))
     pool.close()
     pool.join()
@@ -201,3 +205,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # b_spider = BilibiliSpider()
+    # b_spider.start("http://www.bilibili.com/video/av4139540/")
