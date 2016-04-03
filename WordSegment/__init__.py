@@ -8,6 +8,8 @@ from util import constants
 import filter
 import json
 import codecs
+import os
+from util.datasourceutil import getDataSource
 
 __author__ = 'Liao Zhenyu'
 
@@ -17,9 +19,65 @@ def wordSegment(sentence):
     results = segtool.cut(sentence)
     with codecs.open(constants.PARSE_LOG, mode='a', encoding='utf-8') as f:
         for result in results:
+            # 对一些错别词以及2333...这样的词做替换，用相近的词语代替。
             word = Word(filter.check_cont(result.word), result.flag)
+            # 检查分词分出的词语是否在情感词典中，如果该词不在情感词典中，就将该词舍弃。
+            emotion_dict_path = os.path.join(constants.EMOTION_DICT_PATH, "emotion_dict.txt")
+            emotion_dict = load_emotion_dict(emotion_dict_path)
+            if in_emotion_dict(emotion_dict, word.content) is None:  # 该词语在情感词典中不存在。
+                continue
             f.write(json.dumps(word, encoding='UTF-8', default=Word.word2dict, ensure_ascii=False)+" ")
             if filter.check_refuse_flag(word.pos):
                 words.append(word)
-        f.writelines("\n")
+            f.writelines("\n")
     return words
+
+
+# 读入情感词词典，读入的情感词词典以字典的形式存储，key为情感词的类别，为String；
+# value是一个set实体，set实体中是具体的情感词，为String。最后返回字典格式存储的情感词典。
+# emotion_dict_file_path 情感词典的路径信息。
+def load_emotion_dict(emotion_dict_file_path):
+    emotion_dict = {}
+    with codecs.open(emotion_dict_file_path, "rb", "utf-8") as input_file:
+        for line in input_file:
+            split_line = line.strip().split("\t")
+            if len(split_line) < 2:  # 情感词典的每一行最少有两个部分，第一部分为该情感词的分类（必有）；第二部分为情感词（必有）；第三部分为该情感词的描述信息（可选）。
+                continue
+            key = split_line[0]
+            word = split_line[1]
+            if key in emotion_dict.keys():
+                value_set = emotion_dict[key]
+                value_set.add(word)
+                emotion_dict[key] = value_set
+            else:
+                emotion_dict[key] = set([word])
+    return emotion_dict
+
+
+# 检查某一个词语是否在情感词典中，若该词不在情感词典中，那么返回None。
+# 若该词存在于情感词典中，则返回(词语类别, 词语)形式的元组对象。
+# emotion_dict 情感词典，word 词语String
+def in_emotion_dict(emotion_dict, word):
+    for key in emotion_dict.keys():
+        value_set = emotion_dict[key]
+        if word in value_set:
+            return key, word
+    return None
+
+
+if __name__ == "__main__":
+    # 测试代码
+    danmaku_list = getDataSource(constants.DATASOURCE)
+    print danmaku_list
+    for danmaku in danmaku_list:
+        if danmaku.content is None:
+            continue
+        words = wordSegment(danmaku.content)
+        print words
+
+    # 测试获得情感词典
+    # emotion_dict_path = os.path.join(os.getcwd(), "emotion_dict.txt")
+    # emotion_dict = load_emotion_dict(emotion_dict_path)
+    # for (key, value_set) in emotion_dict.items():
+    #     print key, u"\t", u"\t".join(value for value in value_set), u"\n"
+

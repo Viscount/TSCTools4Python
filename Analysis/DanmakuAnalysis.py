@@ -3,26 +3,15 @@
 
 from util import constants
 from Entity.TimeWindow import TimeWindow
-from util import xmlutil
 from util import danmakuutil
 from util import simutil
 from util import consoleutil as console
+from util.datasourceutil import getDataSource
 import jieba
 import numpy as np
 import os
 
 __author__ = 'Liao Zhenyu'
-
-
-def getDataSource(method):
-    if method == "xml":
-        console.ConsoleUtil.print_console_info("Get data from xml files at " + constants.FILE_PATH)
-        return xmlutil.getDanmakuListFromFile(constants.FILE_PATH)
-    elif method == "database":
-        console.ConsoleUtil.print_console_info("Get data from database")
-        pass
-    else:
-        raise ValueError("数据源参数错误")
 
 
 def buildWindow(danmaku_list, window_size, step_length):

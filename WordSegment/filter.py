@@ -25,7 +25,7 @@ def check_refuse_flag(flag):
 def check_cont(content):
     for item in library.REPALCE_SET:
         pattern = re.compile(item)
-        if re.match(pattern,content) is not None:
+        if re.match(pattern, content) is not None:
             new_content = library.REPLACE_DICT[item]
             return new_content
     return content

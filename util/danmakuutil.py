@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from Entity import Danmaku
 from util import consoleutil as console
 import WordSegment
 
@@ -17,9 +16,9 @@ def extract_users(danmaku_list):
 
 def merge_word_dict(old_word_dict, new_word_dict):
     result_dict = dict()
-    for key,value in old_word_dict.items():
+    for key, value in old_word_dict.items():
         result_dict[key] = value
-    for key,value in new_word_dict.items():
+    for key, value in new_word_dict.items():
         if key in result_dict:
             count = result_dict[key]
             count += value

@@ -191,6 +191,7 @@ def main():
                             help="the internal minute for grabing the bilibili barrages")
     opts = arg_parser.parse_args()
     video_urls = opts.video_urls  # 获得url的list列表。
+    video_urls = ["http://www.bilibili.com/video/av624985/", "http://www.bilibili.com/video/av45493/"]
     print video_urls
 
     ConsoleUtil.print_console_info(u"开始抓取弹幕信息。\n父进程id：%s" % os.getpid())
