@@ -9,12 +9,15 @@ import filter
 import json
 import codecs
 import os
+from util.fileutil import FileUtil
 from util.datasourceutil import getDataSource
 
 __author__ = 'Liao Zhenyu'
 
 
-def wordSegment(sentence):
+# 对一个句子进行词性划分，返回词性划分后的列表；sentence 为需要划分的句子，
+# emotion_dict，用于对句子划分出的结果进行情感词过滤，只有在情感词词典中的划分结果才被接受。
+def wordSegment(emotion_dict, sentence):
     words = []
     results = segtool.cut(sentence)
     with codecs.open(constants.PARSE_LOG, mode='a', encoding='utf-8') as f:
@@ -22,8 +25,6 @@ def wordSegment(sentence):
             # 对一些错别词以及2333...这样的词做替换，用相近的词语代替。
             word = Word(filter.check_cont(result.word), result.flag)
             # 检查分词分出的词语是否在情感词典中，如果该词不在情感词典中，就将该词舍弃。
-            emotion_dict_path = os.path.join(constants.EMOTION_DICT_PATH, "emotion_dict.txt")
-            emotion_dict = load_emotion_dict(emotion_dict_path)
             if in_emotion_dict(emotion_dict, word.content) is None:  # 该词语在情感词典中不存在。
                 continue
             f.write(json.dumps(word, encoding='UTF-8', default=Word.word2dict, ensure_ascii=False)+" ")
@@ -68,16 +69,13 @@ def in_emotion_dict(emotion_dict, word):
 if __name__ == "__main__":
     # 测试代码
     danmaku_list = getDataSource(constants.DATASOURCE)
-    print danmaku_list
+    emotion_dict_path = os.path.join(FileUtil.get_project_root_path(), "WordSegment", "emotion_dict.txt")
+    emotion_dict = load_emotion_dict(emotion_dict_path)
+    for (key, value_set) in emotion_dict.items():
+        print key, u"\t", u"\t".join(value for value in value_set), u"\n"
     for danmaku in danmaku_list:
         if danmaku.content is None:
             continue
-        words = wordSegment(danmaku.content)
-        print words
-
-    # 测试获得情感词典
-    # emotion_dict_path = os.path.join(os.getcwd(), "emotion_dict.txt")
-    # emotion_dict = load_emotion_dict(emotion_dict_path)
-    # for (key, value_set) in emotion_dict.items():
-    #     print key, u"\t", u"\t".join(value for value in value_set), u"\n"
-
+        words = wordSegment(emotion_dict, danmaku.content)
+        for word in words:
+            print word.content

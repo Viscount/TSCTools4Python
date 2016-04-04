@@ -11,6 +11,7 @@ __author__ = "htwxujian@gmail.com"
 
 
 class FileUtil(object):
+    # 如果路径存在，并且是一个文件夹，那么返回true；否则返回false。
     @staticmethod
     def is_dir_exists(dir_path):
         if os.path.isdir(dir_path):
@@ -18,6 +19,7 @@ class FileUtil(object):
         else:
             return False
 
+    # 如果路径存在，并且是一个文件，那么返回true；否则返回false。
     @staticmethod
     def is_file_exists(file_path):
         if os.path.isfile(file_path):
@@ -25,16 +27,27 @@ class FileUtil(object):
         else:
             return False
 
+    # 如果文件夹不存在，那么创建该文件夹，路径链中的文件夹若不存在也将会一同被创建。
+    @staticmethod
+    def create_dir_if_not_exist(dir_path):
+        if FileUtil.is_dir_exists(dir_path) is False:
+            os.makedirs(dir_path)
+
     # 获得当前脚本的运行目录。
     @staticmethod
-    def get_cur_dir():
+    def _get_cur_dir():
         return os.path.dirname(os.path.realpath(__file__))
 
-    # 获得本地数据目录
+    # 获得项目的根路径。
+    @staticmethod
+    def get_project_root_path():
+        (project_root_path, util_path) = os.path.split(FileUtil._get_cur_dir())
+        return project_root_path
+
+    # 获得本地数据目录。
     @staticmethod
     def get_local_data_dir():
-        cur_dir = FileUtil.get_cur_dir()
-        (base_path, util_path) = os.path.split(cur_dir)
+        base_path = FileUtil.get_project_root_path()
         local_data_path = os.path.join(base_path, "data", "local")
         return local_data_path
 

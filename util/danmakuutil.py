@@ -3,6 +3,8 @@
 
 from util import consoleutil as console
 import WordSegment
+import os
+from util.fileutil import FileUtil
 
 __author__ = 'Liao Zhenyu'
 
@@ -34,7 +36,10 @@ def extract_user_feature(danmaku_list):
         if danmaku.content is None:
             continue
         console.ConsoleUtil.print_console_info("start parsing sentence "+danmaku.content)
-        word_list = WordSegment.wordSegment(danmaku.content)
+        # 加载用于过滤的情感词典。
+        emotion_dict_path = os.path.join(FileUtil.get_project_root_path(), "WordSegment", "emotion_dict.txt")
+        emotion_dict = WordSegment.load_emotion_dict(emotion_dict_path)
+        word_list = WordSegment.wordSegment(emotion_dict, danmaku.content)
         if len(word_list) == 0:
             continue
         word_dict = dict()

@@ -10,6 +10,7 @@ from util.datasourceutil import getDataSource
 import jieba
 import numpy as np
 import os
+from util.fileutil import FileUtil
 
 __author__ = 'Liao Zhenyu'
 
@@ -69,6 +70,8 @@ def generateMatrix(time_window):
 
 
 if __name__ == "__main__":
+    # 首先检查弹幕的输出文件夹是否存在，如不存在，那么创建该文件夹。
+    FileUtil.create_dir_if_not_exist(constants.DUMP_PATH)
     danmakuList = getDataSource(constants.DATASOURCE)
     constants.USERID = list(danmakuutil.extract_users(danmakuList))
     jieba.load_userdict(constants.USER_DICT_PATH)
