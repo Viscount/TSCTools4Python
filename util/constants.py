@@ -2,8 +2,8 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'Liao Zhenyu'
 
-DATASOURCE = "xml"
-FILE_PATH = "..\\data\\movie\\2065063.xml"
+DATASOURCE = "txt"
+FILE_PATH = "..\\data\\local\\920120.txt"
 WINDOW_SIZE = 30
 STEP_LENGTH = 10
 USERID = []

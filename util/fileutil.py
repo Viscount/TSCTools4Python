@@ -49,6 +49,7 @@ class FileUtil(object):
     def get_local_data_dir():
         base_path = FileUtil.get_project_root_path()
         local_data_path = os.path.join(base_path, "data", "local")
+        FileUtil.create_dir_if_not_exist(local_data_path)
         return local_data_path
 
     # 获得弹幕文件的路径。

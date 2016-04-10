@@ -5,6 +5,8 @@ import argparse
 import codecs
 import os
 import re
+import sched
+import time
 from multiprocessing import Pool
 
 from db.dao.barragedao import BarrageDao
@@ -191,7 +193,10 @@ def main():
                             help="the internal minute for grabing the bilibili barrages")
     opts = arg_parser.parse_args()
     video_urls = opts.video_urls  # 获得url的list列表。
-    video_urls = ["http://www.bilibili.com/video/av624985/", "http://www.bilibili.com/video/av45493/"]
+    video_urls = ["http://www.bilibili.com/video/av624985/", "http://www.bilibili.com/video/av4258089/",
+                  "http://www.bilibili.com/video/av1206074/",
+                  "http://www.bilibili.com/video/av80193/", "http://www.bilibili.com/video/av1818288/",
+                  "http://www.bilibili.com/video/av3470183/", "http://www.bilibili.com/video/av1502166/"]
     print video_urls
 
     ConsoleUtil.print_console_info(u"开始抓取弹幕信息。\n父进程id：%s" % os.getpid())
@@ -204,7 +209,16 @@ def main():
     ConsoleUtil.print_console_info(u"弹幕信息抓取结束！")
 
 
-if __name__ == "__main__":
+def scheme_task(my_sched, interval_time=60):
     main()
-    # b_spider = BilibiliSpider()
-    # b_spider.start("http://www.bilibili.com/video/av4139540/")
+    my_sched.enter(interval_time, 0, scheme_task, (my_sched, interval_time))
+
+
+def scheme_main(interval_time=60):
+    s = sched.scheduler(time.time, time.sleep)
+    s.enter(interval_time, 0, scheme_task, (s, interval_time))
+    s.run()
+
+
+if __name__ == "__main__":
+    scheme_main(120)

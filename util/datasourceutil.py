@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
-from util import xmlutil, constants
+from util import dataloader, constants
 from util import consoleutil as console
 
 __author__ = 'Liao Zhenyu'
@@ -14,7 +14,10 @@ __author__ = 'Liao Zhenyu'
 def getDataSource(method):
     if method == "xml":
         console.ConsoleUtil.print_console_info("Get data from xml files at " + constants.FILE_PATH)
-        return xmlutil.getDanmakuListFromFile(constants.FILE_PATH)
+        return dataloader.getDanmakuListFromXmlFile(constants.FILE_PATH)
+    elif method == "txt":
+        console.ConsoleUtil.print_console_info("Get data from txt files at " + constants.FILE_PATH)
+        return dataloader.getDanmakuListFromTxtFile(constants.FILE_PATH)
     elif method == "database":
         console.ConsoleUtil.print_console_info("Get data from database")
         pass

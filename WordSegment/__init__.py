@@ -27,12 +27,12 @@ def wordSegment(emotion_dict, sentence):
             # 对一些错别词以及2333...这样的词做替换，用相近的词语代替。
             word = Word(filter.check_cont(result.word), result.flag)
             # 检查分词分出的词语是否在情感词典中，如果该词不在情感词典中，就将该词舍弃。
-            if in_emotion_dict(emotion_dict, word.content) is None:  # 该词语在情感词典中不存在。
-                continue
+            # if in_emotion_dict(emotion_dict, word.content) is None:  # 该词语在情感词典中不存在。
+            #     continue
             f.write(json.dumps(word, encoding='UTF-8', default=Word.word2dict, ensure_ascii=False)+" ")
             if filter.check_refuse_flag(word.pos):
                 words.append(word)
-        f.writelines("\n")
+            f.writelines("\n")
     return words
 
 
