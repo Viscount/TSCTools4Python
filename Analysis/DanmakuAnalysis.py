@@ -7,7 +7,8 @@ from util import danmakuutil
 from util import simutil
 from util import consoleutil as console
 from util.datasourceutil import getDataSource
-import jieba
+import WordSegment
+import GensimSupport
 import numpy as np
 import os
 from util.fileutil import FileUtil
@@ -15,7 +16,13 @@ from util.fileutil import FileUtil
 __author__ = 'Liao Zhenyu'
 
 
-def buildWindow(danmaku_list, window_size, step_length):
+# 根据弹幕列表和预设参数生成时间窗口列表
+# 参数说明：
+# danmaku_list 弹幕列表
+# window_size 时间窗口大小
+# step_length 时间窗口
+# parse_dict 分词词典
+def buildWindow(danmaku_list, window_size, step_length, parse_dict):
     window_list = []
     current_start = 0
     current_end = current_start + window_size
@@ -31,7 +38,7 @@ def buildWindow(danmaku_list, window_size, step_length):
         time_window = TimeWindow(current_index, current_start, current_end)
         time_window.buildUsers(danmakuutil.extract_users(current_danmaku))
         time_window.buildTSCs(len(current_danmaku))
-        time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku))
+        time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku, parse_dict, "word_frequency"))
         window_list.append(time_window)
 
         current_index += 1
@@ -42,6 +49,7 @@ def buildWindow(danmaku_list, window_size, step_length):
     return window_list
 
 
+# 获取时间窗口的统计指标
 def getStatistics(window_list):
     with open(constants.STATISTIC_LOG+"numOfTsc.txt", "w") as f:
         for time_window in window_list:
@@ -49,6 +57,7 @@ def getStatistics(window_list):
             f.write(" ")
 
 
+# 根据时间窗口生成相似度矩阵
 def generateMatrix(time_window):
     user_num = len(constants.USERID)
     cmatrix = np.zeros((user_num, user_num))
@@ -74,8 +83,9 @@ if __name__ == "__main__":
     FileUtil.create_dir_if_not_exist(constants.DUMP_PATH)
     danmakuList = getDataSource(constants.DATASOURCE)
     constants.USERID = list(danmakuutil.extract_users(danmakuList))
-    jieba.load_userdict(constants.USER_DICT_PATH)
-    windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH)
+    parse_dict = WordSegment.get_parse_dict(danmakuList)
+    GensimSupport.get_corpus(parse_dict)
+    windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH, parse_dict)
     getStatistics(windowList)
     for time_window in windowList:
         console.ConsoleUtil.print_console_info("Start generating matrix" + str(time_window.index) + "...")

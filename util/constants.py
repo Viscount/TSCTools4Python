@@ -11,3 +11,6 @@ DUMP_PATH = "..\\data\\matrix\\"
 USER_DICT_PATH = "..\\WordSegment\\user_dict.txt"
 PARSE_LOG = "..\\data\\parseLog.txt"
 STATISTIC_LOG = "..\\data\\"
+DANMAKU_DICT = "..\\data\\danmakuWord.dict"
+CORPUS_PATH = "..\\data\\danmaku.mm"
+

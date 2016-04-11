@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from util import consoleutil as console
-import WordSegment
-import os
-from util.fileutil import FileUtil
+from util import constants
+from gensim import corpora, models
+
 
 __author__ = 'Liao Zhenyu'
 
@@ -30,16 +29,12 @@ def merge_word_dict(old_word_dict, new_word_dict):
     return result_dict
 
 
-def extract_user_feature(danmaku_list):
+def extract_word_frequency(danmaku_list, parse_dict):
     user_feature = dict()
     for danmaku in danmaku_list:
         if danmaku.content is None:
             continue
-        console.ConsoleUtil.print_console_info("start parsing sentence "+danmaku.content)
-        # 加载用于过滤的情感词典。
-        emotion_dict_path = os.path.join(FileUtil.get_project_root_path(), "WordSegment", "emotion_dict.txt")
-        emotion_dict = WordSegment.load_emotion_dict(emotion_dict_path)
-        word_list = WordSegment.wordSegment(emotion_dict, danmaku.content)
+        word_list = parse_dict[danmaku.rowId]
         if len(word_list) == 0:
             continue
         word_dict = dict()
@@ -56,4 +51,27 @@ def extract_user_feature(danmaku_list):
             user_feature[user_id] = merge_word_dict(old_dict, word_dict)
         else:
             user_feature[user_id] = word_dict
+    return user_feature
+
+
+def extract_tf_idf(danmaku_list, parse_dict):
+    user_feature = extract_word_frequency(danmaku_list, parse_dict)
+    dictionary = corpora.Dictionary.load(constants.DANMAKU_DICT)
+    corpus = corpora.MmCorpus(constants.CORPUS_PATH)
+    tfidf = models.TfidfModel(corpus)
+    new_user_feature = dict()
+    for key, value in user_feature.items():
+        word_count_list = []
+        for word, count in value.items():
+            word_token = dictionary.token2id(word)
+            word_count_list.append((word_token, count))
+        new_user_feature[key] = tfidf[word_count_list]
+    return new_user_feature
+
+
+def extract_user_feature(danmaku_list, parse_dict, extract_mode):
+    if extract_mode == 'word_frequency':
+        user_feature = extract_user_feature(danmaku_list, parse_dict)
+    elif extract_mode == 'TF-IDF':
+        user_feature = extract_tf_idf(danmaku_list, parse_dict)
     return user_feature

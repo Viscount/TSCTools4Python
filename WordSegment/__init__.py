@@ -6,6 +6,7 @@ import codecs
 import json
 import os
 
+import jieba
 import jieba.posseg as segtool
 
 import filter
@@ -66,6 +67,20 @@ def in_emotion_dict(emotion_dict, word):
         if word in value_set:
             return key, word
     return None
+
+
+# 建立分词结果dict
+def get_parse_dict(danmaku_list):
+    parse_dict = dict()
+    jieba.load_userdict(constants.USER_DICT_PATH)
+    emotion_dict_path = os.path.join(FileUtil.get_project_root_path(), "WordSegment", "emotion_dict.txt")
+    emotion_dict = load_emotion_dict(emotion_dict_path)
+    for danmaku in danmaku_list:
+        console.ConsoleUtil.print_console_info("start parsing sentence " + danmaku.content)
+        rowId = danmaku.rowId
+        words = wordSegment(emotion_dict, danmaku.content)
+        parse_dict[rowId] = words
+    return parse_dict
 
 
 if __name__ == "__main__":
