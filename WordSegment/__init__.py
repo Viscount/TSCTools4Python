@@ -10,6 +10,7 @@ import jieba
 import jieba.posseg as segtool
 
 import filter
+import logging
 from Entity.Word import Word
 from util import constants
 from util.datasourceutil import getDataSource
@@ -71,15 +72,19 @@ def in_emotion_dict(emotion_dict, word):
 
 # 建立分词结果dict
 def get_parse_dict(danmaku_list):
+    logging.info("Starting parsing sentences in Danmaku...")
     parse_dict = dict()
     jieba.load_userdict(constants.USER_DICT_PATH)
     emotion_dict_path = os.path.join(FileUtil.get_project_root_path(), "WordSegment", "emotion_dict.txt")
     emotion_dict = load_emotion_dict(emotion_dict_path)
     for danmaku in danmaku_list:
-        console.ConsoleUtil.print_console_info("start parsing sentence " + danmaku.content)
         rowId = danmaku.rowId
-        words = wordSegment(emotion_dict, danmaku.content)
-        parse_dict[rowId] = words
+        if danmaku.content is not None:
+            words = wordSegment(emotion_dict, danmaku.content)
+            parse_dict[rowId] = words
+        else:
+            parse_dict[rowId] = None
+    logging.info("parse dictionary has generated!")
     return parse_dict
 
 

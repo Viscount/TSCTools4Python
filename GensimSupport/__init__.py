@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from gensim import corpora
-import logging
+from gensim import corpora, models
 from util import constants
 
 __author__ = 'Liao Zhenyu'
-
-
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
 def get_corpus(parse_dict):
     texts = []
     for key, value in parse_dict.items():
         words = []
+        if value is None:
+            continue
         for word in value:
             words.append(word.content)
-        texts.append(value)
+        texts.append(words)
     dictionary = corpora.Dictionary(texts)
     dictionary.save(constants.DANMAKU_DICT)
     corpus = [dictionary.doc2bow(text) for text in texts]
     corpora.MmCorpus.serialize(constants.CORPUS_PATH, corpus)
+    tfidf = models.TfidfModel(corpus)
+    tfidf.save(constants.TFIDF_MODLE)
     return

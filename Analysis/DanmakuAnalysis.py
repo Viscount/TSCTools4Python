@@ -5,12 +5,12 @@ from util import constants
 from Entity.TimeWindow import TimeWindow
 from util import danmakuutil
 from util import simutil
-from util import consoleutil as console
 from util.datasourceutil import getDataSource
 import WordSegment
 import GensimSupport
 import numpy as np
 import os
+import logging
 from util.fileutil import FileUtil
 
 __author__ = 'Liao Zhenyu'
@@ -29,7 +29,7 @@ def buildWindow(danmaku_list, window_size, step_length, parse_dict):
     current_danmaku = []
     current_index = 0
     while current_start < danmaku_list[-1].videoSecond:
-        console.ConsoleUtil.print_console_info("Building time window " + str(current_index) + "...")
+        logging.info("Building time window " + str(current_index) + "...")
         for danmaku in danmaku_list:
             if current_start <= danmaku.videoSecond <= current_end:
                 current_danmaku.append(danmaku)
@@ -38,7 +38,7 @@ def buildWindow(danmaku_list, window_size, step_length, parse_dict):
         time_window = TimeWindow(current_index, current_start, current_end)
         time_window.buildUsers(danmakuutil.extract_users(current_danmaku))
         time_window.buildTSCs(len(current_danmaku))
-        time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku, parse_dict, "word_frequency"))
+        time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku, parse_dict, "TF-IDF"))
         window_list.append(time_window)
 
         current_index += 1
@@ -69,7 +69,7 @@ def generateMatrix(time_window):
             feature1 = time_window.userFeature.get(user)
             feature2 = time_window.userFeature.get(com_user)
             if feature1 is not None and feature2 is not None:
-                sim = simutil.word_frequency_sim(feature1, feature2)
+                sim = simutil.tf_idf_sim(feature1, feature2)
                 if sim > 0:
                     count += 1
                 cmatrix[index1, index2] = sim
@@ -79,6 +79,7 @@ def generateMatrix(time_window):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     # 首先检查弹幕的输出文件夹是否存在，如不存在，那么创建该文件夹。
     FileUtil.create_dir_if_not_exist(constants.DUMP_PATH)
     danmakuList = getDataSource(constants.DATASOURCE)
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH, parse_dict)
     getStatistics(windowList)
     for time_window in windowList:
-        console.ConsoleUtil.print_console_info("Start generating matrix" + str(time_window.index) + "...")
+        logging.info("Start generating matrix" + str(time_window.index) + "...")
         matrix = generateMatrix(time_window)
         matrix_file_name = "matrix"+str(time_window.index)+".txt"
         with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:

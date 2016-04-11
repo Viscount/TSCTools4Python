@@ -2,8 +2,8 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'Liao Zhenyu'
 
-DATASOURCE = "txt"
-FILE_PATH = "..\\data\\local\\920120.txt"
+DATASOURCE = "xml"
+FILE_PATH = "..\\data\\movie\\2065063.xml"
 WINDOW_SIZE = 30
 STEP_LENGTH = 10
 USERID = []
@@ -13,4 +13,5 @@ PARSE_LOG = "..\\data\\parseLog.txt"
 STATISTIC_LOG = "..\\data\\"
 DANMAKU_DICT = "..\\data\\danmakuWord.dict"
 CORPUS_PATH = "..\\data\\danmaku.mm"
+TFIDF_MODLE = "..\\data\\tf-idf.model"
 

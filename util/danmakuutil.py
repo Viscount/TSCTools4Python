@@ -57,13 +57,12 @@ def extract_word_frequency(danmaku_list, parse_dict):
 def extract_tf_idf(danmaku_list, parse_dict):
     user_feature = extract_word_frequency(danmaku_list, parse_dict)
     dictionary = corpora.Dictionary.load(constants.DANMAKU_DICT)
-    corpus = corpora.MmCorpus(constants.CORPUS_PATH)
-    tfidf = models.TfidfModel(corpus)
+    tfidf = models.TfidfModel.load(constants.TFIDF_MODLE)
     new_user_feature = dict()
     for key, value in user_feature.items():
         word_count_list = []
         for word, count in value.items():
-            word_token = dictionary.token2id(word)
+            word_token = dictionary.token2id[word]
             word_count_list.append((word_token, count))
         new_user_feature[key] = tfidf[word_count_list]
     return new_user_feature
