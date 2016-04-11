@@ -7,9 +7,7 @@
 会出现这个错误：sqlalchemy Table 'barrage' is already defined for this MetaData instance.
 """
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, backref
 
 __author__ = "htwxujian@gmail.com"
 
