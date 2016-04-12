@@ -51,7 +51,7 @@ def buildWindow(danmaku_list, window_size, step_length, parse_dict):
 
 # 获取时间窗口的统计指标
 def getStatistics(window_list):
-    with open(constants.STATISTIC_LOG+"numOfTsc.txt", "w") as f:
+    with open(constants.STATISTIC_LOG, "w") as f:
         for time_window in window_list:
             f.write(str(time_window.tsc_num))
             f.write(" ")
