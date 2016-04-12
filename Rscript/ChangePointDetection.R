@@ -21,5 +21,5 @@ for (i in (WindowSize+1):CmatrixNum ){
   rt = rt / WindowSize
   zArray[i] = 1 - ut %*% rt/norm(as.matrix(ut),"f")/norm(as.matrix(rt),"f")
 }
-save(zArray,file = "zArrayTrueman4Python")
-save(eigenArray,file = "zArrayTruemanEigen4Python")
+save(zArray,file = "zArrayTfidfTrueman4Python")
+save(eigenArray,file = "zArrayTfidfTruemanEigen4Python")
