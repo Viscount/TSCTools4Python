@@ -4,6 +4,7 @@
 from db.dao.videodao import VideoDao
 from db.dbutil import DBUtil
 from db.model.barrage import Barrage
+from util.dataloader import sort_barrages
 
 """
 对movie数据库表进行存取操作
