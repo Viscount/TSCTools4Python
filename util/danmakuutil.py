@@ -70,7 +70,7 @@ def extract_tf_idf(danmaku_list, parse_dict):
 
 def extract_user_feature(danmaku_list, parse_dict, extract_mode):
     if extract_mode == 'word_frequency':
-        user_feature = extract_user_feature(danmaku_list, parse_dict)
+        user_feature = extract_word_frequency(danmaku_list, parse_dict)
     elif extract_mode == 'TF-IDF':
         user_feature = extract_tf_idf(danmaku_list, parse_dict)
     return user_feature

@@ -69,7 +69,7 @@ def generateMatrix(time_window):
             feature1 = time_window.userFeature.get(user)
             feature2 = time_window.userFeature.get(com_user)
             if feature1 is not None and feature2 is not None:
-                sim = simutil.tf_idf_sim(feature1, feature2)
+                sim = simutil.tf_idf_cos_sim(feature1, feature2)
                 if sim > 0:
                     count += 1
                 cmatrix[index1, index2] = sim

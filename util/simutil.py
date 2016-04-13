@@ -7,7 +7,7 @@ import math
 __author__ = 'Liao Zhenyu'
 
 
-def word_frequency_sim(userFeature1, userFeature2):
+def word_frequency_jaccard_sim(userFeature1, userFeature2):
     sumset = set()
     total = 0
     common = 0
@@ -22,6 +22,17 @@ def word_frequency_sim(userFeature1, userFeature2):
     return common * 1.0 / total
 
 
+def word_frequency_cos_sim(userFeature1, userFeature2):
+    commonset = set()
+    for key in userFeature1.keys():
+        if key in userFeature2.keys():
+            commonset.add(key)
+    dot = 0.0
+    for key in commonset:
+        dot += userFeature1[key] * userFeature2[key]
+    return dot/norm(userFeature1)/norm(userFeature2)
+
+
 def norm(userFeature):
     sqrsum = 0.0
     for key, value in userFeature.items():
@@ -29,7 +40,7 @@ def norm(userFeature):
     return math.sqrt(sqrsum)
 
 
-def tf_idf_sim(userFeature1, userFeature2):
+def tf_idf_cos_sim(userFeature1, userFeature2):
     userFeatureDict1 = dict()
     userFeatureDict2 = dict()
     for (token, weight) in userFeature1:
@@ -44,3 +55,10 @@ def tf_idf_sim(userFeature1, userFeature2):
     for key in commonset:
         dot += userFeatureDict1[key] * userFeatureDict2[key]
     return dot/norm(userFeatureDict1)/norm(userFeatureDict2)
+
+
+if __name__ == "__main__":
+    userFeature1 = {"token1": 1, "token2": 2}
+    userFeature2 = {"token1": 2, "token3": 1}
+    print norm(userFeature1)
+    print word_frequency_cos_sim(userFeature1, userFeature2)
