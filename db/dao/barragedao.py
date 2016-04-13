@@ -1,11 +1,10 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
-from decimal import Decimal, getcontext
-
 from db.dao.videodao import VideoDao
 from db.dbutil import DBUtil
 from db.model import Barrage
+from util.dataloader import sort_barrages
 
 """
 对movie数据库表进行存取操作
@@ -68,20 +67,6 @@ class BarrageDao(object):
         finally:
             DBUtil.close_session(session)
 
-    @staticmethod
-    def __sort_barrages_by_play_timestamp(barrage):
-        # 由于play_timestamp字符串时间戳的小树位置不定，所以用Decial将字符串转化为数字
-        # 将 decimal 的精度设置为30
-        getcontext().prec = 30
-        return Decimal(barrage.play_timestamp)
-
-    # order_flag：True 按照play_timestamp升序排列
-    # order_flag：False 按照play_timestamp降序排列
-    @staticmethod
-    def sort_barrages(barrages, order_flag=False):
-        barrages = sorted(barrages, key=BarrageDao.__sort_barrages_by_play_timestamp, reverse=order_flag)
-        return barrages
-
     # 查询出cid对应的所有的barrage
     # order_flag：True 按照play_timestamp升序排列
     # order_flag：False 按照play_timestamp降序排列
@@ -90,7 +75,7 @@ class BarrageDao(object):
         session = DBUtil.open_session()
         try:
             barrages = session.query(Barrage).filter(Barrage.video_cid == cid).all()
-            return BarrageDao.sort_barrages(barrages)
+            return sort_barrages(barrages)
         except Exception as e:
             print e
             session.rollback()
