@@ -17,4 +17,5 @@ STATISTIC_LOG = os.path.join("data", "numOfTsc.txt")
 DANMAKU_DICT = os.path.join("data", "damakuWord.dict")
 CORPUS_PATH = os.path.join("data", "danmaku.mm")
 TFIDF_MODLE = os.path.join("data", "tf-idf.model")
+LDA_MODLE = os.path.join("data", "lda.model")
 

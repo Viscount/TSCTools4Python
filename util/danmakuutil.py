@@ -68,9 +68,21 @@ def extract_tf_idf(danmaku_list, parse_dict):
     return new_user_feature
 
 
+def extract_lda(danmaku_list, parse_dict):
+    user_feature = extract_tf_idf(danmaku_list, parse_dict)
+    lda_model = models.LdaModel.load(constants.LDA_MODLE)
+    new_user_feature = dict()
+    for key, value in user_feature.items():
+        topics = lda_model.get_document_topics(value)
+        new_user_feature[key] = topics
+    return new_user_feature
+
+
 def extract_user_feature(danmaku_list, parse_dict, extract_mode):
     if extract_mode == 'word_frequency':
         user_feature = extract_word_frequency(danmaku_list, parse_dict)
     elif extract_mode == 'TF-IDF':
         user_feature = extract_tf_idf(danmaku_list, parse_dict)
+    elif extract_mode == "LDA":
+        user_feature = extract_lda(danmaku_list, parse_dict)
     return user_feature
