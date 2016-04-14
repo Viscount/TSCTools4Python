@@ -23,7 +23,7 @@ def merge_word_dict(old_word_dict, new_word_dict):
         if key in result_dict:
             count = result_dict[key]
             count += value
-            result_dict[key] = value
+            result_dict[key] = count
         else:
             result_dict[key] = value
     return result_dict
