@@ -4,7 +4,6 @@
 
 import codecs
 import json
-import os
 
 import jieba
 import jieba.posseg as segtool
@@ -36,7 +35,6 @@ def wordSegment(emotion_dict, sentence):
             if filter.check_refuse_flag(word.pos):
                 words.append(word)
                 f.write(json.dumps(word, encoding='UTF-8', default=Word.word2dict, ensure_ascii=False) + " ")
-            f.writelines("\n")
     return words
 
 
