@@ -5,16 +5,23 @@ try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
-from Entity.Danmaku import Danmaku
-from decimal import Decimal, getcontext
 import codecs
+import datetime
+import logging
+import math
 import os
 import re
-from util.fileutil import FileUtil
+from decimal import Decimal, getcontext
+
+from gensim import corpora
+
+from Entity.Danmaku import Danmaku
 from db.model.barrage import Barrage
-import math
+from util.fileutil import FileUtil
 
 __author__ = 'Liao Zhenyu'
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
 def getDanmakuListFromXmlFile(file_path):
@@ -40,6 +47,39 @@ def getDanmakuListFromTxtFile(file_path):
             danmaku = Danmaku(param_str, split_info[len(split_info) - 1])
             dankamu_list.append(danmaku)
     return sorted(dankamu_list, key=lambda danmaku: danmaku.videoSecond)
+
+
+# 解析出bilibili直播的弹幕数据。
+def getDanmakuListFromLiveTextFile(file_path):
+    with codecs.open(file_path, "rb", "utf-8") as input_file:
+        (folder, file_name) = os.path.split(file_path)
+        barrage_start_datetime_str = file_name.split(".")[0] + " 12:00:00"  # 每场围棋比赛是当天12点开始的。
+        barrage_start_datetime = datetime.datetime.strptime(barrage_start_datetime_str, "%Y-%m-%d %H:%M:%S")
+        sender_name_list = []
+        danmaku_list = []
+        for line in input_file:
+            split_info = line.strip().split("\t")
+            if len(split_info) < 3:
+                continue
+            datetime_str = split_info[0]
+            sender_name = split_info[1]
+            content = split_info[2]
+            barrage_datetime = datetime.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
+            if barrage_datetime < barrage_start_datetime:
+                continue  # 比赛还未开始的弹幕略去
+            barrage_timestamp = str((barrage_datetime - barrage_start_datetime).total_seconds())
+            sender_name_list.append([sender_name])
+            # 构建适配参数
+            param_str = barrage_timestamp + ",,,,,," + sender_name + ","
+            danmaku = Danmaku(param_str, content)
+            danmaku_list.append(danmaku)
+        # 为每一个用户的名称对应一个唯一的数字表示
+        dictionary = corpora.Dictionary(sender_name_list)
+        dictionary.save("live_sender_name.dict")
+        # 在将danmaku_list中的danmaku用户名称替换为刚刚生成的对应数字表示
+        for danmaku in danmaku_list:
+            danmaku.senderId = str(dictionary.token2id[danmaku.senderId])
+        return danmaku_list
 
 
 # 对xml弹幕数据进行排序，将排序好的弹幕数据写入代码文件的当前目录下。
@@ -114,4 +154,13 @@ if __name__ == "__main__":
     # danmakuList = getDanmakuListFromTxtFile(FILE_PATH)
     # for danmaku in danmakuList:
     #     print danmaku.videoSecond, u"\t", danmaku.content
-    gen_sorted_danmaku_file_from_xml(os.path.join(FileUtil.get_project_root_path(), "data", "movie", "2065063.xml"))
+
+    # 将xml文件的弹幕数据读取出来，排序后写入当前的文件夹下。
+    # gen_sorted_danmaku_file_from_xml(os.path.join(FileUtil.get_project_root_path(), "data", "movie", "2065063.xml"))
+
+    # 从弹幕的live数据中读取信息。
+    danmaku_list = getDanmakuListFromLiveTextFile(
+        os.path.join(FileUtil.get_project_root_path(), "data", "AlphaGo", "bilibili",
+                     "2016-03-09.txt"))
+    for danmaku in danmaku_list:
+        print str(danmaku.videoSecond), u"\t", danmaku.senderId, u"\t", danmaku.content, u"\n"
