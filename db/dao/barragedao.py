@@ -33,8 +33,8 @@ class BarrageDao(object):
             for barrage in barrages:
                 b = Barrage(row_id=barrage[7], play_timestamp=barrage[0], type=barrage[1], font_size=barrage[2],
                             font_color=barrage[3], unix_timestamp=barrage[4], pool=barrage[5], sender_id=barrage[6],
-                            content=barrage[8])
-                b.video = video
+                            content=barrage[8], video=video)
+                # b.video = video
                 session.add(b)
             session.commit()
             return True

@@ -10,6 +10,7 @@ import WordSegment
 import GensimSupport
 import numpy as np
 import os
+import codecs
 import logging
 from util.fileutil import FileUtil
 
@@ -85,12 +86,22 @@ if __name__ == "__main__":
     danmakuList = getDataSource(constants.DATASOURCE)
     constants.USERID = list(danmakuutil.extract_users(danmakuList))
     parse_dict = WordSegment.get_parse_dict(danmakuList)
-    GensimSupport.get_corpus(parse_dict)
+    # GensimSupport.get_corpus(parse_dict)
     windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH, parse_dict)
-    getStatistics(windowList)
-    for time_window in windowList:
-        logging.info("Start generating matrix" + str(time_window.index) + "...")
-        matrix = generateMatrix(time_window)
-        matrix_file_name = "matrix"+str(time_window.index)+".txt"
-        with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:
-            np.savetxt(f, matrix, fmt='%.2f', newline='\n')
+    # getStatistics(windowList)
+    # for time_window in windowList:
+    #     logging.info("Start generating matrix" + str(time_window.index) + "...")
+    #     matrix = generateMatrix(time_window)
+    #     matrix_file_name = "matrix"+str(time_window.index)+".txt"
+    #     with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:
+    #         np.savetxt(f, matrix, fmt='%.2f', newline='\n')
+
+    with codecs.open("seg-result.txt", "wb", "utf-8") as output_file:
+        for time_window in windowList:
+            str_info = str(time_window.index) + u"\t"
+            for user_id, word_frequency in time_window.userFeature.items():
+                str_info += (user_id + u"\t")
+                for word, frequency in word_frequency.items():
+                    str_info += (word + u"\t" + str(frequency) + u"\t")
+            print str_info
+            output_file.write(str_info)
