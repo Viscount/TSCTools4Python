@@ -22,4 +22,6 @@ def get_corpus(parse_dict):
     corpora.MmCorpus.serialize(constants.CORPUS_PATH, corpus)
     tfidf = models.TfidfModel(corpus)
     tfidf.save(constants.TFIDF_MODLE)
+    lda_model = models.LdaModel(corpus=corpus, num_topics=20, id2word=dictionary)
+    lda_model.save(constants.LDA_MODLE)
     return

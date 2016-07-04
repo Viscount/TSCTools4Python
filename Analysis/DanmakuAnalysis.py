@@ -7,6 +7,7 @@ from util import danmakuutil
 from util import simutil
 from util.datasourceutil import getDataSource
 import WordSegment
+import codecs
 import GensimSupport
 import numpy as np
 import os
@@ -29,6 +30,8 @@ def buildWindow(danmaku_list, window_size, step_length, parse_dict):
     current_end = current_start + window_size
     current_danmaku = []
     current_index = 0
+    if FileUtil.is_file_exists(constants.WINDOW_LOG):
+        os.remove(constants.WINDOW_LOG)
     while current_start < danmaku_list[-1].videoSecond:
         logging.info("Building time window " + str(current_index) + "...")
         for danmaku in danmaku_list:
@@ -36,10 +39,11 @@ def buildWindow(danmaku_list, window_size, step_length, parse_dict):
                 current_danmaku.append(danmaku)
             elif danmaku.videoSecond > current_end:
                 break
+        writeWindowLog(current_index, current_start, current_end, current_danmaku)
         time_window = TimeWindow(current_index, current_start, current_end)
         time_window.buildUsers(danmakuutil.extract_users(current_danmaku))
         time_window.buildTSCs(len(current_danmaku))
-        time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku, parse_dict, "TF-IDF"))
+        time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku, parse_dict, "Word-Frequency"))
         window_list.append(time_window)
 
         current_index += 1
@@ -49,6 +53,20 @@ def buildWindow(danmaku_list, window_size, step_length, parse_dict):
 
     return window_list
 
+
+# 窗口划分Log
+def writeWindowLog(index, start, end, danmakuList):
+    with codecs.open(constants.WINDOW_LOG, mode='a', encoding='utf-8') as f:
+        f.write("Window No. " + str(index+1) + "\n")
+        f.write("From " + time_format_trans(start) + " to " + time_format_trans(end) + "\n")
+        for danmaku in danmakuList:
+            if danmaku.content is not None:
+                f.write(danmaku.content + "\n")
+        f.write("========================================================================\n")
+
+
+def time_format_trans(seconds):
+    return str(seconds / 60)+"min"+str(seconds % 60)+"sec"
 
 # 获取时间窗口的统计指标
 def getStatistics(window_list):
@@ -70,7 +88,7 @@ def generateMatrix(time_window):
             feature1 = time_window.userFeature.get(user)
             feature2 = time_window.userFeature.get(com_user)
             if feature1 is not None and feature2 is not None:
-                sim = simutil.tf_idf_cos_sim(feature1, feature2)
+                sim = simutil.word_frequency_cos_sim(feature1, feature2)
                 if sim > 0:
                     count += 1
                 cmatrix[index1, index2] = sim
@@ -83,6 +101,8 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     # 首先检查弹幕的输出文件夹是否存在，如不存在，那么创建该文件夹。
     FileUtil.create_dir_if_not_exist(constants.DUMP_PATH)
+    if FileUtil.is_file_exists(constants.PARSE_LOG):
+        os.remove(constants.PARSE_LOG)
     danmakuList = getDataSource(constants.DATASOURCE)
     constants.USERID = list(danmakuutil.extract_users(danmakuList))
     parse_dict = WordSegment.get_parse_dict(danmakuList)

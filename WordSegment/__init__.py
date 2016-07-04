@@ -4,13 +4,13 @@
 
 import codecs
 import json
-import os
 
 import jieba
 import jieba.posseg as segtool
 
 import filter
 import logging
+import os
 from Entity.Word import Word
 from util import constants
 from util.datasourceutil import getDataSource
@@ -31,10 +31,10 @@ def wordSegment(emotion_dict, sentence):
             # 检查分词分出的词语是否在情感词典中，如果该词不在情感词典中，就将该词舍弃。
             # if in_emotion_dict(emotion_dict, word.content) is None:  # 该词语在情感词典中不存在。
             #     continue
-            f.write(json.dumps(word, encoding='UTF-8', default=Word.word2dict, ensure_ascii=False)+" ")
+
             if filter.check_refuse_flag(word.pos):
                 words.append(word)
-            f.writelines("\n")
+                f.write(json.dumps(word, encoding='UTF-8', default=Word.word2dict, ensure_ascii=False) + " ")
     return words
 
 
