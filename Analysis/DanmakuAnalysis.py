@@ -42,6 +42,7 @@ def buildWindow(danmaku_list, window_size, step_length, parse_dict):
         time_window = TimeWindow(current_index, current_start, current_end)
         time_window.buildUsers(danmakuutil.extract_users(current_danmaku))
         time_window.buildTSCs(len(current_danmaku))
+        time_window.buildTSCLength(current_danmaku)
         time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku, parse_dict, "Word-Frequency"))
         window_list.append(time_window)
 
@@ -69,9 +70,19 @@ def time_format_trans(seconds):
 
 # 获取时间窗口的统计指标
 def getStatistics(window_list):
+    danmakuList = getDataSource(constants.DATASOURCE)
+    overall_length = 0.0
+    for danmaku in danmakuList:
+        if danmaku.content is not None:
+            overall_length += len(danmaku.content)
+    logging.info("Average length = " + str(overall_length/len(danmakuList)))
+    logging.info("First Danmaku timestamp = " + str(danmakuList[0].videoSecond))
+    logging.info("Latest Danmaku timestamp = " + str(danmakuList[-1].videoSecond))
+    logging.info("Total number of users = " + str(len(constants.USERID)))
     with open(constants.STATISTIC_LOG, "w") as f:
         for time_window in window_list:
             f.write(str(time_window.tsc_num))
+            # f.write(str(time_window.tsc_avg_length))
             f.write(" ")
 
 
@@ -108,9 +119,9 @@ if __name__ == "__main__":
     GensimSupport.get_corpus(parse_dict)
     windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH, parse_dict)
     getStatistics(windowList)
-    for time_window in windowList:
-        logging.info("Start generating matrix" + str(time_window.index) + "...")
-        matrix = generateMatrix(time_window)
-        matrix_file_name = "matrix"+str(time_window.index)+".txt"
-        with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:
-            np.savetxt(f, matrix, fmt='%.2f', newline='\n')
+    # for time_window in windowList:
+    #     logging.info("Start generating matrix" + str(time_window.index) + "...")
+    #     matrix = generateMatrix(time_window)
+    #     matrix_file_name = "matrix"+str(time_window.index)+".txt"
+    #     with open(os.path.join(constants.DUMP_PATH, matrix_file_name), mode="w") as f:
+    #         np.savetxt(f, matrix, fmt='%.2f', newline='\n')
