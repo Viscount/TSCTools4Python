@@ -37,14 +37,19 @@ def extract_word_frequency(danmaku_list, parse_dict):
         word_list = parse_dict[danmaku.rowId]
         if len(word_list) == 0:
             continue
-        word_dict = dict()
+        text = list()
         for word in word_list:
-            if word.content in word_dict:
-                count = word_dict[word.content]
-                count += 1
-                word_dict[word.content] = count
-            else:
-                word_dict[word.content] = 1
+            text.append(word.content)
+        # word_dict = dict()
+        # for word in word_list:
+        #     if word.content in word_dict:
+        #         count = word_dict[word.content]
+        #         count += 1
+        #         word_dict[word.content] = count
+        #     else:
+        #         word_dict[word.content] = 1
+        dictionary = corpora.Dictionary.load(constants.DANMAKU_DICT)
+        word_dict = dictionary.doc2bow(text)
         user_id = danmaku.senderId
         if user_id in user_feature:
             old_dict = user_feature[user_id]

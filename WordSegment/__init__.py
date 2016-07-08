@@ -32,9 +32,9 @@ def wordSegment(emotion_dict, sentence):
             # if in_emotion_dict(emotion_dict, word.content) is None:  # 该词语在情感词典中不存在。
             #     continue
 
-            if filter.check_refuse_flag(word.pos):
-                words.append(word)
-                f.write(json.dumps(word, encoding='UTF-8', default=Word.word2dict, ensure_ascii=False) + " ")
+            # if filter.check_refuse_flag(word.pos):
+            words.append(word)
+            f.write(json.dumps(word, encoding='UTF-8', default=Word.word2dict, ensure_ascii=False) + " ")
     return words
 
 
