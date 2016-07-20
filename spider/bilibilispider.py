@@ -9,8 +9,8 @@ import sched
 import time
 from multiprocessing import Pool
 
-# from db.dao.barragedao import BarrageDao
-# from db.dao.videodao import VideoDao
+from db.dao.barragedao import BarrageDao
+from db.dao.videodao import VideoDao
 from spider import BarrageSpider
 from util.datetimeutil import DateTimeUtil
 from util.fileutil import FileUtil
@@ -237,10 +237,10 @@ class BilibiliSpider(BarrageSpider):
         # 将更新后的弹幕信息写入数据库。
         if is_save_to_db:
             # 将视频信息存储入数据库中
-            # VideoDao.add_video(cid, title, tags, aid, unicode(video_url))
+            VideoDao.add_video(cid, title, tags, meta_keywords, aid, unicode(video_url))
             # 获取更新的弹幕信息。
             barrages = self.get_refresh_video_barrage(cid, barrages)
-            # BarrageDao.add_barrages(barrages, cid)
+            BarrageDao.add_barrages(barrages, cid)
         # 将更新后的弹幕信息写入本地文件。
         self.save_barrages_to_local(cid, barrages, is_corpus)
 

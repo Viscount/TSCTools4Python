@@ -16,10 +16,10 @@ class VideoDao(DBUtil):
     DBUtil.init_db()
 
     @staticmethod
-    def add_video(cid, title, tags, aid, url):
+    def add_video(cid, title, tags, metakeywords, aid, url):
         print "video info before"
         print cid, title, tags, aid, url
-        video_info = Video(cid=cid, title=title, tags=tags, aid=aid, url=url)
+        video_info = Video(cid=cid, title=title, tags=tags, metakeywords=metakeywords, aid=aid, url=url)
         print "video info after"
         session = DBUtil.open_session()
         try:
