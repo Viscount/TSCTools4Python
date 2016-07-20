@@ -20,3 +20,4 @@ class Video(__BASE_MODEL):
     tags = Column(Text, nullable=False)  # 视频的标签信息，格式为：一级标签\t二级标签...
     aid = Column(String(30), nullable=False)  # 视频的aid
     url = Column(Text, nullable=False)  # 视频的网址链接
+

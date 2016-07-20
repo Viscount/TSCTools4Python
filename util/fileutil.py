@@ -11,6 +11,7 @@ __author__ = "htwxujian@gmail.com"
 
 
 class FileUtil(object):
+
     # 如果路径存在，并且是一个文件夹，那么返回true；否则返回false。
     @staticmethod
     def is_dir_exists(dir_path):
@@ -44,6 +45,13 @@ class FileUtil(object):
         (project_root_path, util_path) = os.path.split(FileUtil._get_cur_dir())
         return project_root_path
 
+    # 获得项目数据根目录
+    @staticmethod
+    def get_data_root_dir():
+        base_path = FileUtil.get_project_root_path()
+        data_root_path = os.path.join(base_path, "data")
+        return data_root_path
+
     # 获得本地数据目录。
     @staticmethod
     def get_local_data_dir():
@@ -53,9 +61,14 @@ class FileUtil(object):
         return local_data_path
 
     # 获得弹幕文件的路径。
+    # 参数： is_corpus 当前的弹幕文件是否为语料，默认为false，不为语料
+    #       cid 视频对应的cid信息（基于b站）
     @staticmethod
-    def get_barrage_file_path(cid):
-        return os.path.join(FileUtil.get_local_data_dir(), cid + ".txt")
+    def get_barrage_file_path(cid, is_corpus=False):
+        if not is_corpus:
+            return os.path.join(FileUtil.get_local_data_dir(), cid + ".txt")
+        else:
+            return os.path.join(FileUtil.get_corpus_dir(), cid + ".txt")
 
     # 分块读取文件的内容。
     @staticmethod
@@ -98,6 +111,79 @@ class FileUtil(object):
         for index in xrange(0, len(last_lines)):
             last_lines[index] = last_lines[index].decode("utf-8", "ignore")
         return last_lines
+
+    # 构建分词结果文件的文件名称（根据本地txt弹幕文件的cid 加上
+    # -seg-result.json 问分词结果的文件名。即cid-seg-result.json）
+    # 参数： cid 本地原始弹幕文件的cid信息。
+    @staticmethod
+    def get_word_segment_result_file_path(cid):
+        word_segment_result_file_path = u"".join([cid, "-seg-result.json"])
+        word_segment_result_file_path = os.path.join(FileUtil.get_word_segment_dir(), word_segment_result_file_path)
+        return word_segment_result_file_path
+
+    # 获得分词结果的路径。
+    @staticmethod
+    def get_word_segment_dir():
+        project_root_path = FileUtil.get_project_root_path()
+        word_segment_dir = os.path.join(project_root_path, "data", "wordsegment")
+        FileUtil.create_dir_if_not_exist(word_segment_dir)
+        return word_segment_dir
+
+    # 从弹幕的文件路径中获得cid信息
+    @staticmethod
+    def get_cid_from_barrage_file_path(barrage_file_path):
+        (barrage_file_dir, barrage_file_name) = os.path.split(barrage_file_path)
+        split_info = barrage_file_name.split(".")
+        cid = split_info[0]
+        return cid
+
+    # 获得相似度矩阵的结果存储路径
+    @staticmethod
+    def get_similarity_matrix_dir():
+        data_dir = FileUtil.get_data_root_dir()
+        similarity_matrix_dir = os.path.join(data_dir, "matrix")
+        FileUtil.create_dir_if_not_exist(similarity_matrix_dir)
+        return similarity_matrix_dir
+
+    # 获得项目字典数据的存储路径
+    @staticmethod
+    def get_dict_dir():
+        data_dir = FileUtil.get_data_root_dir()
+        dict_dir = os.path.join(data_dir, "dict")
+        FileUtil.create_dir_if_not_exist(dict_dir)
+        return dict_dir
+
+    # 获得tfidf字典数据的路径
+    @staticmethod
+    def get_train_model_dir():
+        data_dir = FileUtil.get_data_root_dir()
+        train_model_dir = os.path.join(data_dir, "model")
+        FileUtil.create_dir_if_not_exist(train_model_dir)
+        return train_model_dir
+
+    # 获得zscore结果的存储路径
+    @staticmethod
+    def get_zscore_dir():
+        data_dir = FileUtil.get_data_root_dir()
+        zscore_dir = os.path.join(data_dir, "zscore")
+        FileUtil.create_dir_if_not_exist(zscore_dir)
+        return zscore_dir
+
+    # 获得情感分析结果的数据路径
+    @staticmethod
+    def get_emotion_dir():
+        data_dir = FileUtil.get_data_root_dir()
+        emotion_dir = os.path.join(data_dir, "emotion")
+        FileUtil.create_dir_if_not_exist(emotion_dir)
+        return emotion_dir
+
+    # 获得语料库的路径
+    @staticmethod
+    def get_corpus_dir():
+        data_dir = FileUtil.get_data_root_dir()
+        corpus_dir = os.path.join(data_dir, "corpus")
+        FileUtil.create_dir_if_not_exist(corpus_dir)
+        return corpus_dir
 
 
 if __name__ == "__main__":
