@@ -33,7 +33,7 @@ class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
         return self.result
 
 
-class BarrageSpider(object):
+class Spider(object):
     FILESYSTEMENCODING = sys.getfilesystemencoding()
 
     def __init__(self):
@@ -47,9 +47,13 @@ class BarrageSpider(object):
         self.try_times = 5
 
     @staticmethod
-    def __construct_req(site_url, post_data, headers):
+    def construct_req_by_post(site_url, post_data, headers):
         post_data = urllib.urlencode(post_data)
         return urllib2.Request(site_url, data=post_data, headers=headers)
+
+    @staticmethod
+    def construct_req_by_get(site_url, headers):
+        return urllib2.Request(site_url, headers=headers)
 
     def __access_url_internal(self, req, timeout=60, try_times=1):
         try:
@@ -65,7 +69,7 @@ class BarrageSpider(object):
             # 发现发生 HTTPError 502 错误时，重试链接并没有效果。
             self.__access_url_internal(req, timeout, try_times + 1)
 
-    def __access_url(self, req, timeout=60):
+    def access_url(self, req, timeout=60):
         resp = self.__access_url_internal(req, timeout)
         if resp is False:
             Logger.print_console_info(u"无法连接：" + unicode(req.get_full_url()))
@@ -73,13 +77,14 @@ class BarrageSpider(object):
         else:
             return resp
 
+    # 获得html页面的代码。
     def get_html_content(self, site_url, post_data=None, headers=None):
         if post_data is None:
             post_data = self.post_data
         if headers is None:
             headers = self.headers
-        req = self.__construct_req(site_url, post_data, headers)
-        resp = self.__access_url(req, self.timeout)
+        req = self.construct_req_by_post(site_url, post_data, headers)
+        resp = self.access_url(req, self.timeout)
         # 获得返回网页的相关信息
         try:
             page_html = resp.read()
@@ -102,6 +107,12 @@ class BarrageSpider(object):
                 return ""
         page_html = page_html.decode("utf-8", "ignore")
         return page_html
+
+
+class BarrageSpider(Spider):
+    
+    def __init__(self):
+        super(BarrageSpider, self).__init__()
 
     @classmethod
     def __sort_barrages_by_play_timestamp(cls, barrage):
