@@ -18,7 +18,10 @@ class FileDownload(Spider):
     # 从这网站获取b站的视频下载链接信息：http://www.ibilibili.com/video/av5394711/
     def get_download_links(self, video_link):
         html_content = self.get_html_content(video_link)
-        pattern = re.compile(r'<ul\sclass="list-group"\sid="download">.*?<a\shref ="(.*?)".*?>视频下载.*?</a>.*?<a\shref ="(.*?)".*?>MP3下载.*?</a>.*?</ul>', re.S)
+        # 原来的正则匹配语句：<ul\sclass="list-group"\sid="download">.*?<a\shref ="(.*?)".*?>视频下载.*?</a>.*?
+        # <a\shref ="(.*?)".*?>MP3下载.*?</a>.*?</ul> 因为包含有中文，一致匹配不上，具体原因未知。
+        pattern = re.compile(r'<ul\sclass="list-group"\sid="download">.*?'
+                             r'<a href ="(.*?)".*?>.*?</a>.*?<a href ="(.*?)".*?>MP3.*?</a>.*?</ul>', re.S)
         match = re.search(pattern, html_content)
         if match is None:
             return None
@@ -50,4 +53,7 @@ class FileDownload(Spider):
 if __name__ == "__main__":
     file_download = FileDownload()
     # file_download.download_file(download_url="http://down.360safe.com/se/360se8.1.1.216.exe", file_name="360se8.1.1.216.exe")
-    file_download.get_download_links("http://www.ibilibili.com/video/av5394711/")
+    video_download_link, mp3_download_link = file_download.get_download_links("http://www.ibilibili.com/video/av5394711/")
+    print video_download_link, mp3_download_link
+    file_download.download_file(mp3_download_link, "av5394711.mp3")
+    file_download.download_file(video_download_link, "av5394711.mp4")
