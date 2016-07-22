@@ -43,7 +43,7 @@ def build_window(danmaku_list, window_size, step_length, parse_dict):
         time_window.buildUsers(danmakuutil.extract_users(current_danmaku))
         time_window.buildTSCs(len(current_danmaku))
         time_window.buildTSCLength(current_danmaku)
-        time_window.buildEntropy(current_danmaku, parse_dict)
+        # time_window.buildEntropy(current_danmaku, parse_dict)
         # time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku, parse_dict, "Word-Frequency"))
         window_list.append(time_window)
 
@@ -83,7 +83,7 @@ def get_statistics(window_list):
     logging.info("Total number of users = " + str(len(constants.USERID)))
     with open(constants.STATISTIC_LOG, "w") as f:
         for time_window in window_list:
-            f.write(str(time_window.entropy))
+            f.write(str(time_window.tsc_num))
             # f.write(str(time_window.tsc_avg_length))
             f.write(" ")
 
