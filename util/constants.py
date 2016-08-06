@@ -6,7 +6,7 @@ import os
 __author__ = 'Liao Zhenyu'
 
 DATASOURCE = "xml"
-FILE_PATH = os.path.join("..", "data", "movie", "4547002.xml")
+FILE_PATH = os.path.join("..", "data", "movie", "2065063.xml")
 WINDOW_SIZE = 30
 STEP_LENGTH = 10
 USERID = []
