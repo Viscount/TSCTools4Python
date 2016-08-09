@@ -99,9 +99,13 @@ class FileUtil(object):
             # 从文件末尾向前seek，统计末尾内容的换行符数量。
             while input_file.tell() > 0 and line_count < (last_n + 1):
                 seek_times += 1
-                input_file.seek(-seek_times * buffer_size, 2)
-                content = input_file.read(seek_times * buffer_size)
-                input_file.seek(-seek_times * buffer_size, 2)
+                # 往回seek，超过文件长度的话会报错
+                seek_buffer = seek_times * buffer_size
+                if seek_buffer > input_file.tell():
+                    seek_buffer = input_file.tell()
+                input_file.seek(-seek_buffer, 2)
+                content = input_file.read(seek_buffer)
+                input_file.seek(-seek_buffer, 2)
                 line_count = content.count("\n")
             content = input_file.read(seek_times * buffer_size)
         # 得到文本的最后几行内容。
