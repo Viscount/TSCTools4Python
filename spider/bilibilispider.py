@@ -217,7 +217,9 @@ class BilibiliSpider(BarrageSpider):
     # 参数： video_url  视频的链接信息
     #       is_save_to_db 是否要将弹幕信息写入数据库
     #       is_corpus 写入到本地的弹幕文件是否以语料的方式存储，默认为false，不作为语料存储
-    def start_spider_barrage(self, video_url, is_save_to_db=True, is_corpus=False):
+    #       season_id  番剧的id信息，该字段不为null时，表示当前视频为番剧的一集
+    #       season_index  当前视频为番剧的第几集
+    def start_spider_barrage(self, video_url, is_save_to_db=True, is_corpus=False, season_id=None, season_index=None):
         print u"进入 start_spider_barrage 函数。"
         # 视频网页的html源码信息。
         video_html_content = self.get_response_content(video_url)
@@ -231,7 +233,6 @@ class BilibiliSpider(BarrageSpider):
         tags = self.get_video_tags(video_html_content)
         title = self.get_video_title(video_html_content)
         meta_keywords = self.get_video_meta_keywords(video_html_content)
-        video_title_info = self.get_video_title_info(video_html_content)
 
         # 获取弹幕信息。
         barrages = self.get_row_video_barrage(self.barrage_xml_url(cid))
@@ -240,7 +241,7 @@ class BilibiliSpider(BarrageSpider):
         # 将更新后的弹幕信息写入数据库。
         if is_save_to_db:
             # 将视频信息存储入数据库中
-            VideoDao.add_video(cid, title, tags, meta_keywords, aid, unicode(video_url))
+            VideoDao.add_video(cid, title, tags, meta_keywords, aid, unicode(video_url), season_id, season_index)
             # 获取更新的弹幕信息。
             barrages = self.get_refresh_video_barrage(cid, barrages)
             BarrageDao.add_barrages(barrages, cid)

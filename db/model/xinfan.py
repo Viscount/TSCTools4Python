@@ -5,12 +5,30 @@
 新番信息的实体类
 """
 
+from sqlalchemy import Column, String, Text, Integer
+
+from db.model import BaseModel
+
 __author__ = "htwxujian@gmail.com"
 
+__BASE_MODEL = BaseModel.get_base_model()
 
-class XinFan:
 
-    def __init__(self, cover, is_finish, newest_ep_index, pub_time, season_id, title, total_count, url, week):
+class XinFan(__BASE_MODEL):
+    __tablename__ = 'xinfan'
+    cover = Column(Text, nullable=True)
+    is_finish = Column(Integer, nullable=True)
+    newest_ep_index = Column(Text, nullable=True)
+    pub_time = Column(Integer, nullable=True)
+    season_id = Column(String(30), primary_key=True)
+    title = Column(Text, nullable=True)
+    total_count = Column(Integer, nullable=True)
+    url = Column(Text, nullable=True)
+    week = Column(String(30), nullable=True)
+    tags = Column(Text, nullable=True)
+
+    def __init__(self, cover=None, is_finish=None, newest_ep_index=None, pub_time=None, season_id=None, title=None,
+                 total_count=None, url=None, week=None):
         self.cover = cover  # 新番的封面图片
         self.is_finish = is_finish  # 新番是否完结，1表示正在连载，2表示已完结
         self.newest_ep_index = newest_ep_index  # 当前新番连载的最新集数

@@ -3,6 +3,7 @@
 
 from db.dbutil import DBUtil
 from db.model.video import Video
+from db.dao.xinfandao import XinFanDao
 
 """
 对movie数据库表进行存取操作
@@ -16,11 +17,11 @@ class VideoDao(DBUtil):
     DBUtil.init_db()
 
     @staticmethod
-    def add_video(cid, title, tags, metakeywords, aid, url):
-        print "video info before"
-        print cid, title, tags, aid, url
+    def add_video(cid, title, tags, metakeywords, aid, url, season_id=None, season_index=None):
         video_info = Video(cid=cid, title=title, tags=tags, metakeywords=metakeywords, aid=aid, url=url)
-        print "video info after"
+        if (season_id is not None) and (season_index is not None):
+            video_info.xinfan = XinFanDao.get_xinfan_by_season_id(season_id)
+            video_info.season_index = season_index
         session = DBUtil.open_session()
         try:
             session.add(video_info)

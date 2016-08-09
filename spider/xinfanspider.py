@@ -15,6 +15,8 @@ import json
 import math
 from db.model.xinfan import XinFan
 import re
+from db.dao.xinfandao import XinFanDao
+from spider.bilibilispider import BilibiliSpider
 
 __author__ = "htwxujian@gmail.com"
 logger = Logger("video-url-spider.log").get_logger()
@@ -27,6 +29,7 @@ class XinFanSpider(BarrageSpider):
         # b站新番列表的获取api链接 'http://bangumi.bilibili.com/web_api/season/index?page=1&version=0&index_type=0&pagesize=30'
         self.xin_fan_base_url = 'http://bangumi.bilibili.com/web_api/season/index'
         self.page_size = 30  # 每一个新番页面对应的新番个数
+        self.bilibili_spider = BilibiliSpider()
 
     # 构建新番api的获取连接信息（新番分为多页显示）
     # 输入：page 当前页面的下标
@@ -67,6 +70,8 @@ class XinFanSpider(BarrageSpider):
             url = item.get('url', None)  # 进入新番列表的连接
             week = item.get('week', None)  # 这个暂时不知道意义
             xin_fan = XinFan(cover, is_finish, newest_ep_index, pub_time, season_id, title, total_count, url, week)
+            # 设置新番的tags
+            xin_fan.tags = self.__get_xin_fan_tags(self.get_response_content(url))
             xin_fans.append(xin_fan)
         return xin_fans
 
@@ -80,7 +85,7 @@ class XinFanSpider(BarrageSpider):
         return tags
 
     # 获取新番的所有剧集连接，关于aid的剧集链接。
-    def get_anime_url(self, page_html):
+    def __get_anime_url(self, page_html):
         pattern = re.compile(r'<li class="v1-bangumi-list-part-child".*?<a class="v1-short-text" href="(.*?)".*?</li>', re.S)
         match = re.findall(pattern, page_html)
         if match is None:
@@ -103,21 +108,38 @@ class XinFanSpider(BarrageSpider):
         xin_fan_count = self.__get_xin_fan_count()
         # 2. 获取新番剧集的页数，page_size默认是30
         xin_fan_page_count = self.__get_xin_fan_page_count(xin_fan_count)
+        # xin_fan_page_count = 1
         for index in xrange(1, xin_fan_page_count + 1):
             json_data = self.get_response_content(self.__construct_xin_fan_list_url(page=str(index)))
             res_dict = json.loads(json_data, encoding='utf-8')
             if res_dict is None:
                 continue
             xin_fan_list += self.__convert_dict_to_xin_fan(res_dict['result']['list'])
+
+        xin_fan_info_list = []
+        for xin_fan in xin_fan_list:
+            xin_fan_info_list.append((xin_fan.season_id, xin_fan.url))
+
+        # 3.将所有新番的基本信息写入数据库。
+        XinFanDao.add_xin_fans(xin_fan_list)
+
+        for index in xrange(0, len(xin_fan_info_list)):
+            xin_fan = xin_fan_info_list[index]
+            # 4. 获得新番所有剧集的av链接信息
+            page_html = self.get_response_content(xin_fan[1])
+            anime_aid_urls = self.__get_anime_url(page_html)
+            for av_url in anime_aid_urls:
+                self.bilibili_spider.start_spider_barrage(video_url=av_url, is_save_to_db=True,
+                                                          season_id=xin_fan[0], season_index=index)
         return xin_fan_list
 
 
 if __name__ == '__main__':
     xin_fan_spider = XinFanSpider()
-    # xin_fan_list = xin_fan_spider.get_xin_fan_info()
-    # print xin_fan_list
+    xin_fan_list = xin_fan_spider.get_xin_fan_info()
+    print xin_fan_list
 
     # print xin_fan_spider.get_xin_fan_tags(xin_fan_spider.get_response_content('http://bangumi.bilibili.com/anime/5070/'))
-    anime_list =  xin_fan_spider.get_anime_url(xin_fan_spider.get_response_content('http://bangumi.bilibili.com/anime/5070/'))
-    print len(anime_list)
-    print anime_list
+    # anime_list =  xin_fan_spider.get_anime_url(xin_fan_spider.get_response_content('http://bangumi.bilibili.com/anime/5070/'))
+    # print len(anime_list)
+    # print anime_list
