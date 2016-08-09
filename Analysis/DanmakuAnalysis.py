@@ -24,7 +24,7 @@ __author__ = 'Liao Zhenyu'
 # window_size 时间窗口大小
 # step_length 时间窗口
 # parse_dict 分词词典
-def buildWindow(danmaku_list, window_size, step_length, parse_dict):
+def build_window(danmaku_list, window_size, step_length, parse_dict):
     window_list = []
     current_start = 0
     current_end = current_start + window_size
@@ -39,11 +39,13 @@ def buildWindow(danmaku_list, window_size, step_length, parse_dict):
                 current_danmaku.append(danmaku)
             elif danmaku.videoSecond > current_end:
                 break
-        writeWindowLog(current_index, current_start, current_end, current_danmaku)
+        # write_window_log(current_index, current_start, current_end, current_danmaku)
         time_window = TimeWindow(current_index, current_start, current_end)
         time_window.buildUsers(danmakuutil.extract_users(current_danmaku))
         time_window.buildTSCs(len(current_danmaku))
-        time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku, parse_dict, "Word-Frequency"))
+        time_window.buildTSCLength(current_danmaku)
+        # time_window.buildEntropy(current_danmaku, parse_dict)
+        # time_window.buildUserFeature(danmakuutil.extract_user_feature(current_danmaku, parse_dict, "Word-Frequency"))
         window_list.append(time_window)
 
         current_index += 1
@@ -55,7 +57,7 @@ def buildWindow(danmaku_list, window_size, step_length, parse_dict):
 
 
 # 窗口划分Log
-def writeWindowLog(index, start, end, danmakuList):
+def write_window_log(index, start, end, danmakuList):
     with codecs.open(constants.WINDOW_LOG, mode='a', encoding='utf-8') as f:
         f.write("Window No. " + str(index+1) + "\n")
         f.write("From " + time_format_trans(start) + " to " + time_format_trans(end) + "\n")
@@ -68,16 +70,27 @@ def writeWindowLog(index, start, end, danmakuList):
 def time_format_trans(seconds):
     return str(seconds / 60)+"min"+str(seconds % 60)+"sec"
 
+
 # 获取时间窗口的统计指标
-def getStatistics(window_list):
+def get_statistics(window_list):
+    danmakuList = getDataSource(constants.DATASOURCE)
+    overall_length = 0.0
+    for danmaku in danmakuList:
+        if danmaku.content is not None:
+            overall_length += len(danmaku.content)
+    logging.info("Average length = " + str(overall_length/len(danmakuList)))
+    logging.info("First Danmaku timestamp = " + str(danmakuList[0].videoSecond))
+    logging.info("Latest Danmaku timestamp = " + str(danmakuList[-1].videoSecond))
+    logging.info("Total number of users = " + str(len(constants.USERID)))
     with open(constants.STATISTIC_LOG, "w") as f:
         for time_window in window_list:
             f.write(str(time_window.tsc_num))
+            # f.write(str(time_window.tsc_avg_length))
             f.write(" ")
 
 
 # 根据时间窗口生成相似度矩阵
-def generateMatrix(time_window):
+def generate_matrix(time_window):
     user_num = len(constants.USERID)
     cmatrix = np.zeros((user_num, user_num))
     count = 0
@@ -107,7 +120,7 @@ if __name__ == "__main__":
     constants.USERID = list(danmakuutil.extract_users(danmakuList))
     parse_dict = WordSegment.get_parse_dict(danmakuList)
     # GensimSupport.get_corpus(parse_dict)
-    windowList = buildWindow(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH, parse_dict)
+    windowList = build_window(danmakuList, constants.WINDOW_SIZE, constants.STEP_LENGTH, parse_dict)
     # getStatistics(windowList)
     # for time_window in windowList:
     #     logging.info("Start generating matrix" + str(time_window.index) + "...")
@@ -125,3 +138,4 @@ if __name__ == "__main__":
                     str_info += (word + u"\t" + str(frequency) + u"\t")
             print str_info
             output_file.write(str_info)
+
