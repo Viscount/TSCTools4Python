@@ -17,7 +17,7 @@ class FileDownload(Spider):
     # 获取视频的下载链接信息。
     # 从这网站获取b站的视频下载链接信息：http://www.ibilibili.com/video/av5394711/
     def get_download_links(self, video_link):
-        html_content = self.get_html_content(video_link)
+        html_content = self.get_response_content(video_link)
         # 原来的正则匹配语句：<ul\sclass="list-group"\sid="download">.*?<a\shref ="(.*?)".*?>视频下载.*?</a>.*?
         # <a\shref ="(.*?)".*?>MP3下载.*?</a>.*?</ul> 因为包含有中文，一致匹配不上，具体原因未知。
         pattern = re.compile(r'<ul\sclass="list-group"\sid="download">.*?'

@@ -121,7 +121,7 @@ class BilibiliSpider(BarrageSpider):
     # 获得弹幕xml链接地址上的全部弹幕信息。
     def get_row_video_barrage(self, barrage_xml_url):
         # 获取弹幕网页的源代码
-        barrage_html = self.get_html_content(barrage_xml_url)
+        barrage_html = self.get_response_content(barrage_xml_url)
         # 弹幕出现的播放时间，弹幕类型，字体大小，字体颜色，弹幕出现的unix时间戳，弹幕池，弹幕创建者id，弹幕id
         pattern = re.compile(r'<d p="(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)">(.*?)</d>', re.S)
         barrages = re.findall(pattern, barrage_html)
@@ -220,7 +220,7 @@ class BilibiliSpider(BarrageSpider):
     def start_spider_barrage(self, video_url, is_save_to_db=True, is_corpus=False):
         print u"进入 start_spider_barrage 函数。"
         # 视频网页的html源码信息。
-        video_html_content = self.get_html_content(video_url)
+        video_html_content = self.get_response_content(video_url)
         if video_html_content is None:
             # 说明网络连接可能有问题，导致无法获得网页源码。
             Logger.print_console_info(u"无法获得网页html代码，请检查网址是否输入正确，或检查网络连接是否正常！！")
@@ -307,7 +307,7 @@ class BilibiliSpider(BarrageSpider):
     def get_video_urls(self, video_list_urls, barrage_threshold=100):
         video_urls = []
         for video_list_url in video_list_urls:
-            html_content = self.get_html_content(video_list_url)
+            html_content = self.get_response_content(video_list_url)
             pattern = re.compile(
                 r'<div class="l-r"><a href="(.*?)".*?>.*?</a><div class="v-desc">.*?</div>.*?<i class="b-icon b-icon-v-dm".*?></i><span number=".*?">(.*?)</span>',
                 re.S)
@@ -330,7 +330,7 @@ class BilibiliSpider(BarrageSpider):
     def start_collect_barrage_corpus(self, bilibili_url):
         logger.debug(u"进入 start_spider_video_url 函数！！")
         # 获得视频弹幕排序网页的网页源代码
-        html_content = self.get_html_content(bilibili_url)
+        html_content = self.get_response_content(bilibili_url)
         video_list_page_count = self.get_video_list_page_count(html_content)
         # 获得视频列表 页面的 页数url信息（第一页到最后一页）
         video_list_urls = self.get_relative_video_list_urls(video_list_page_count, bilibili_url)

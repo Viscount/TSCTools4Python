@@ -5,6 +5,7 @@ import sys
 import urllib
 import urllib2
 import zlib
+import PyV8
 from decimal import Decimal, getcontext
 
 from util.loggerutil import Logger
@@ -77,8 +78,8 @@ class Spider(object):
         else:
             return resp
 
-    # 获得html页面的代码。
-    def get_html_content(self, site_url, post_data=None, headers=None):
+    # 获得网络回复response的内容，有可能是页面的html代码，有可能是json数据。
+    def get_response_content(self, site_url, post_data=None, headers=None):
         if post_data is None:
             post_data = self.post_data
         if headers is None:
@@ -87,7 +88,7 @@ class Spider(object):
         resp = self.access_url(req, self.timeout)
         # 获得返回网页的相关信息
         try:
-            page_html = resp.read()
+            response_content = resp.read()
         except Exception as exception:
             logger.debug(unicode(exception))
             return ""
@@ -97,16 +98,22 @@ class Spider(object):
                 u"网页：" + unicode(resp.url) + u"\t压缩格式： " + unicode(resp_info["Content-Encoding"]))
             try:
                 if resp_info["Content-Encoding"] == "deflate":
-                    page_html = zlib.decompress(page_html, -zlib.MAX_WBITS)
+                    response_content = zlib.decompress(response_content, -zlib.MAX_WBITS)
                 elif resp_info["Content-Encoding"] == "gzip":
-                    page_html = zlib.decompress(page_html, zlib.MAX_WBITS | 16)
+                    response_content = zlib.decompress(response_content, zlib.MAX_WBITS | 16)
                 elif resp_info["Content-Encoding"] == "zlib":
-                    page_html = zlib.decompress(page_html, zlib.MAX_WBITS)
+                    response_content = zlib.decompress(response_content, zlib.MAX_WBITS)
             except zlib.error as exception:
                 logger.debug(exception)
                 return ""
-        page_html = page_html.decode("utf-8", "ignore")
-        return page_html
+        # 在这里还要加上一步，因为有些页面的html代码是由js生成并填充上去的，所以这里需要去执行html代码里面的js代码获得全部的html代码
+        response_content = response_content.decode("utf-8", "ignore")
+        return response_content
+
+
+# 有些页面的html代码是由js生成并填充上去的，所以这里需要去执行html代码里面的js代码获得全部的html代码
+def parse_page_html_by_js(page_html):
+    pass
 
 
 class BarrageSpider(Spider):
@@ -132,6 +139,7 @@ class BarrageSpider(Spider):
 
 if __name__ == "__main__":
     bSpider = BarrageSpider()
-    url = "http://www.bilibili.com/video/av4252347/"
+    # url = "http://www.bilibili.com/video/av4252347/"
     # url = "http://www.bilibili.com/video/av4122999/"
-    Logger.print_console_info(bSpider.get_html_content(url))
+    url = 'http://bangumi.bilibili.com/anime/index'
+    Logger.print_console_info(bSpider.get_response_content(url))
