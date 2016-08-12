@@ -108,7 +108,7 @@ class XinFanSpider(BarrageSpider):
         xin_fan_count = self.__get_xin_fan_count()
         # 2. 获取新番剧集的页数，page_size默认是30
         xin_fan_page_count = self.__get_xin_fan_page_count(xin_fan_count)
-        # xin_fan_page_count = 1
+        xin_fan_page_count = 1
         for index in xrange(1, xin_fan_page_count + 1):
             json_data = self.get_response_content(self.__construct_xin_fan_list_url(page=str(index)))
             res_dict = json.loads(json_data, encoding='utf-8')
@@ -127,7 +127,7 @@ class XinFanSpider(BarrageSpider):
             xin_fan = xin_fan_info_list[index]
             # 4. 获得新番所有剧集的av链接信息
             page_html = self.get_response_content(xin_fan[1])
-            anime_aid_urls = self.__get_anime_url(page_html)
+            anime_aid_urls = [self.__get_anime_url(page_html)[0]]
             for av_url in anime_aid_urls:
                 self.bilibili_spider.start_spider_barrage(video_url=av_url, is_save_to_db=True,
                                                           season_id=xin_fan[0], season_index=index)
