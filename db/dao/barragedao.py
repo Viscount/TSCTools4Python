@@ -23,8 +23,8 @@ class BarrageDao(object):
     """
 
     @staticmethod
-    def add_barrages(barrages, cid):
-        video = VideoDao.get_video_by_cid(cid)
+    def add_barrages(barrages, aid):
+        video = VideoDao.get_video_by_aid(aid)
         if video is None:
             return False
         # 批量存储数据库记录。
@@ -46,8 +46,8 @@ class BarrageDao(object):
             DBUtil.close_session(session)
 
     @staticmethod
-    def add_barrage(play_timestamp, type, font_size, font_color, unix_timestamp, pool, sender_id, row_id, content, cid):
-        video = VideoDao.get_video_by_cid(cid)
+    def add_barrage(play_timestamp, type, font_size, font_color, unix_timestamp, pool, sender_id, row_id, content, aid):
+        video = VideoDao.get_video_by_aid(aid)
         if video is None:
             return False
         barrage = Barrage(play_timestamp=play_timestamp, type=type, font_size=font_size, font_color=font_color,
@@ -71,10 +71,10 @@ class BarrageDao(object):
     # order_flag：True 按照play_timestamp升序排列
     # order_flag：False 按照play_timestamp降序排列
     @staticmethod
-    def get_all_barrages_by_cid(cid, order_flag=False):
+    def get_all_barrages_by_aid(aid, order_flag=False):
         session = DBUtil.open_session()
         try:
-            barrages = session.query(Barrage).filter(Barrage.video_aid == cid).all()
+            barrages = session.query(Barrage).filter(Barrage.video_aid == aid).all()
             return sort_barrages(barrages)
         except Exception as e:
             print e
@@ -85,7 +85,7 @@ class BarrageDao(object):
 
 
 if __name__ == "__main__":
-    barrages = BarrageDao.get_all_barrages_by_cid("6671044")
+    barrages = BarrageDao.get_all_barrages_by_aid("6671044")
     # 将 decimal 的精度设置为30
     for barrage in barrages:
         print barrage.play_timestamp

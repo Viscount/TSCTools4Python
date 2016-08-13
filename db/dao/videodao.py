@@ -35,12 +35,12 @@ class VideoDao(DBUtil):
             DBUtil.close_session(session)
 
     @staticmethod
-    def get_video_by_cid(cid):
-        if cid is None:
+    def get_video_by_aid(aid):
+        if aid is None:
             return None
         session = DBUtil.open_session()
         # 根据主键查询
-        video_query = session.query(Video).filter(Video.cid == cid)
+        video_query = session.query(Video).filter(Video.aid == aid)
         if video_query.count() <= 0:
             DBUtil.close_session(session)
             return None
@@ -51,5 +51,5 @@ class VideoDao(DBUtil):
 
 
 if __name__ == "__main__":
-    video = VideoDao.get_video_by_cid("6684033")
+    video = VideoDao.get_video_by_aid("6684033")
     print video.title

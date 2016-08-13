@@ -244,7 +244,7 @@ class BilibiliSpider(BarrageSpider):
             VideoDao.add_video(cid, title, tags, meta_keywords, aid, unicode(video_url), season_id, season_index)
             # 获取更新的弹幕信息。
             barrages = self.get_refresh_video_barrage(cid, barrages)
-            BarrageDao.add_barrages(barrages, cid)
+            BarrageDao.add_barrages(barrages, aid)
         # 将更新后的弹幕信息写入本地文件。
         self.save_barrages_to_local(cid, barrages, is_corpus)
 

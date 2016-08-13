@@ -98,6 +98,7 @@ class XinFanSpider(BarrageSpider):
             match = re.search(pattern, page_html)
             if match is None:
                 anime_aid_urls.append(None)
+                continue
             anime_aid_urls.append(match.groups()[0])
         return anime_aid_urls  # 返回剧集的链接列表信息，或者是None
 
