@@ -74,7 +74,7 @@ class BarrageDao(object):
     def get_all_barrages_by_cid(cid, order_flag=False):
         session = DBUtil.open_session()
         try:
-            barrages = session.query(Barrage).filter(Barrage.video_cid == cid).all()
+            barrages = session.query(Barrage).filter(Barrage.video_aid == cid).all()
             return sort_barrages(barrages)
         except Exception as e:
             print e

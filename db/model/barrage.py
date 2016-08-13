@@ -27,7 +27,7 @@ class Barrage(__BASE_MODEL):
     sender_id = Column(String(20), nullable=False)  # 发送者的ID，用于“屏蔽此弹幕的发送者”功能
     content = Column(Text, nullable=False)  # 弹幕内容
     # 外键信息
-    video_cid = Column(String(30), ForeignKey("video.cid"))
+    video_aid = Column(String(30), ForeignKey("video.aid"))
     # 这样就可以使用video.barrages获得该视频的所有弹幕信息。
     video = relationship("Video", backref=backref("barrages", uselist=True, cascade="delete, all"))
 
@@ -50,4 +50,4 @@ class Barrage(__BASE_MODEL):
             self.video = Video()
         else:
             self.video = video
-        self.video_cid = None
+        self.video_aid = None
