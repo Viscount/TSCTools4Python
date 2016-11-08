@@ -55,4 +55,5 @@ _barrage_表结构：
 调用```db.dao.bilibili_xml_parser.BilibiliXmlParser```中的```save_xml_barrage_to_db(xml_file_path)```方法。该方法返回True时，数据库操作成功。
 _注：_
 > ```xml_file_path``` 参数必须是 以 (\d)+.xml结尾的字符串，否则xml文件中的弹幕无法存入数据库。
+> 这是markdown
 
