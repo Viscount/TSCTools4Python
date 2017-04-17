@@ -5,7 +5,6 @@ import sys
 import urllib
 import urllib2
 import zlib
-import PyV8
 from decimal import Decimal, getcontext
 
 from util.loggerutil import Logger

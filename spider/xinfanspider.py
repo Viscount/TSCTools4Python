@@ -84,27 +84,21 @@ class XinFanSpider(BarrageSpider):
         tags = '\t'.join(match)
         return tags
 
-    # 获取新番的所有剧集连接，关于aid的剧集链接。
-    def __get_anime_url(self, page_html):
-        pattern = re.compile(r'<li>.*?<div class="v">.*?<a class="preview".*?href="(.*?)".*?</li>', re.S)
-        match = re.findall(pattern, page_html)
-        if match is None:
-            return None
-        # 接下来访问链接，获取av号格式的视频链接信息
+    # 获取番剧分集的url列表
+    def __get_anime_url(self, json_data):
+        base_url = "http://www.bilibili.com/video/av"
+        json_data = json_data[19:-2]
+        res_dict = json.loads(json_data, encoding='utf-8')
         anime_aid_urls = []
-        for item_url in match:
-            item_url = 'http:' + item_url.strip()
-            anime_aid_urls.append(item_url)
-        # anime_aid_urls = []
-        # for item_url in match:
-        #     page_html = self.get_response_content(item_url)
-        #     pattern = re.compile(r'</time>.*?<a href="(.*?)" class="v-av-link" target="_blank" >.*?</a>', re.S)
-        #     match = re.search(pattern, page_html)
-        #     if match is None:
-        #         anime_aid_urls.append(None)
-        #         continue
-        #     anime_aid_urls.append(match.groups()[0])
+        anime_episodes = res_dict["result"]["episodes"]
+        for episode in anime_episodes:
+            anime_aid_urls.append(base_url + episode["av_id"] + "/")
         return anime_aid_urls  # 返回剧集的链接列表信息，或者是None
+
+    def __construct_xin_fan_detail_url(self, season_id):
+        base_url_header = "http://bangumi.bilibili.com/jsonp/seasoninfo/"
+        base_url_footer = ".ver?callback=seasonListCallback&jsonp=jsonp"
+        return base_url_header + str(season_id) + base_url_footer
 
     # 获取新番列表的所有信息
     def get_xin_fan_info(self):
@@ -113,7 +107,7 @@ class XinFanSpider(BarrageSpider):
         xin_fan_count = self.__get_xin_fan_count()
         # 2. 获取新番剧集的页数，page_size默认是30
         xin_fan_page_count = self.__get_xin_fan_page_count(xin_fan_count)
-        xin_fan_page_count = 1
+        # xin_fan_page_count = 1
         for index in xrange(1, xin_fan_page_count + 1):
             json_data = self.get_response_content(self.__construct_xin_fan_list_url(page=str(index)))
             res_dict = json.loads(json_data, encoding='utf-8')
@@ -128,11 +122,20 @@ class XinFanSpider(BarrageSpider):
         # 3.将所有新番的基本信息写入数据库。
         XinFanDao.add_xin_fans(xin_fan_list)
 
+        # for index in xrange(0, len(xin_fan_info_list)):
+        #     xin_fan = xin_fan_info_list[index]
+        #     # 4. 获得新番所有剧集的av链接信息
+        #     page_html = self.get_response_content(xin_fan[1])
+        #     anime_aid_urls = self.__get_anime_url(page_html)
+        #     for av_url in anime_aid_urls:
+        #         self.bilibili_spider.start_spider_barrage(video_url=av_url, is_save_to_db=True,
+        #                                                   season_id=xin_fan[0], season_index=index)
+
         for index in xrange(0, len(xin_fan_info_list)):
             xin_fan = xin_fan_info_list[index]
             # 4. 获得新番所有剧集的av链接信息
-            page_html = self.get_response_content(xin_fan[1])
-            anime_aid_urls = self.__get_anime_url(page_html)
+            json_data = self.get_response_content(self.__construct_xin_fan_detail_url(xin_fan[0]))
+            anime_aid_urls = self.__get_anime_url(json_data)
             for av_url in anime_aid_urls:
                 self.bilibili_spider.start_spider_barrage(video_url=av_url, is_save_to_db=True,
                                                           season_id=xin_fan[0], season_index=index)
