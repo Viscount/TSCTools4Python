@@ -97,39 +97,32 @@ class XinFanSpider(BarrageSpider):
         return base_url_header + str(season_id) + base_url_footer
 
     # 获取新番列表的所有信息
-    def get_xin_fan_info(self):
+    def get_xin_fan_info(self, update_flag=False):
         xin_fan_list = []  # 新番的基本信息列表
-        # 1. 首先用默认的连接请求新番列表
-        xin_fan_count = self.__get_xin_fan_count()
-        # 2. 获取新番剧集的页数，page_size默认是30
-        xin_fan_page_count = self.__get_xin_fan_page_count(xin_fan_count)
-        # xin_fan_page_count = 2
-        for index in xrange(1, xin_fan_page_count + 1):
-            json_data = self.get_response_content(self.__construct_xin_fan_list_url(page=str(index)))
-            res_dict = json.loads(json_data, encoding='utf-8')
-            if res_dict is None:
-                continue
-            xin_fan_list += self.__convert_dict_to_xin_fan(res_dict['result']['list'])
+        if update_flag:
+            # 1. 首先用默认的连接请求新番列表
+            xin_fan_count = self.__get_xin_fan_count()
+            # 2. 获取新番剧集的页数，page_size默认是30
+            xin_fan_page_count = self.__get_xin_fan_page_count(xin_fan_count)
+            # xin_fan_page_count = 2
+            for index in xrange(1, xin_fan_page_count + 1):
+                json_data = self.get_response_content(self.__construct_xin_fan_list_url(page=str(index)))
+                res_dict = json.loads(json_data, encoding='utf-8')
+                if res_dict is None:
+                    continue
+                xin_fan_list += self.__convert_dict_to_xin_fan(res_dict['result']['list'])
+                # 3.将所有新番的基本信息写入数据库。
+                XinFanDao.add_xin_fans(xin_fan_list)
+        else:
+            xin_fan_list = XinFanDao.get_all_xinfan()
 
         xin_fan_info_list = []
         for xin_fan in xin_fan_list:
             xin_fan_info_list.append((xin_fan.season_id, xin_fan.url))
 
-        # 3.将所有新番的基本信息写入数据库。
-        # XinFanDao.add_xin_fans(xin_fan_list)
-
-        # for index in xrange(0, len(xin_fan_info_list)):
-        #     xin_fan = xin_fan_info_list[index]
-        #     # 4. 获得新番所有剧集的av链接信息
-        #     page_html = self.get_response_content(xin_fan[1])
-        #     anime_aid_urls = self.__get_anime_url(page_html)
-        #     for av_url in anime_aid_urls:
-        #         self.bilibili_spider.start_spider_barrage(video_url=av_url, is_save_to_db=True,
-        #                                                   season_id=xin_fan[0], season_index=index)
-
         for index in xrange(0, len(xin_fan_info_list)):
             xin_fan = xin_fan_info_list[index]
-            # 4. 获得新番所有剧集的av链接信息
+            # 获得新番所有剧集的av链接信息
             json_data = self.get_response_content(self.__construct_xin_fan_detail_url(xin_fan[0]))
             anime_episodes = self.__get_anime_episodes(json_data)
             for av_episode in anime_episodes:
@@ -144,7 +137,7 @@ class XinFanSpider(BarrageSpider):
 
 if __name__ == '__main__':
     xin_fan_spider = XinFanSpider()
-    xin_fan_list = xin_fan_spider.get_xin_fan_info()
+    xin_fan_list = xin_fan_spider.get_xin_fan_info(update_flag=False)
     print xin_fan_list
 
     # print xin_fan_spider.get_xin_fan_tags(xin_fan_spider.get_response_content('http://bangumi.bilibili.com/anime/5070/'))

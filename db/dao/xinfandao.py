@@ -60,3 +60,17 @@ class XinFanDao(DBUtil):
             xin_fan_info = xin_fan_query.one()
             DBUtil.close_session(session)
             return xin_fan_info
+
+    @staticmethod
+    def get_all_xinfan():
+        session = DBUtil.open_session()
+        try:
+            ret = session.query(XinFan).all()
+            return ret
+
+        except Exception as e:
+            print e
+            session.rollback()
+            return None
+        finally:
+            DBUtil.close_session(session)
