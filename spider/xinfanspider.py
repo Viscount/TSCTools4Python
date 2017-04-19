@@ -85,15 +85,11 @@ class XinFanSpider(BarrageSpider):
         return tags
 
     # 获取番剧分集的url列表
-    def __get_anime_url(self, json_data):
-        base_url = "http://www.bilibili.com/video/av"
+    def __get_anime_episodes(self, json_data):
         json_data = json_data[19:-2]
         res_dict = json.loads(json_data, encoding='utf-8')
-        anime_aid_urls = []
         anime_episodes = res_dict["result"]["episodes"]
-        for episode in anime_episodes:
-            anime_aid_urls.append(base_url + episode["av_id"] + "/")
-        return anime_aid_urls  # 返回剧集的链接列表信息，或者是None
+        return anime_episodes  # 返回剧集的链接列表信息，或者是None
 
     def __construct_xin_fan_detail_url(self, season_id):
         base_url_header = "http://bangumi.bilibili.com/jsonp/seasoninfo/"
@@ -107,7 +103,7 @@ class XinFanSpider(BarrageSpider):
         xin_fan_count = self.__get_xin_fan_count()
         # 2. 获取新番剧集的页数，page_size默认是30
         xin_fan_page_count = self.__get_xin_fan_page_count(xin_fan_count)
-        # xin_fan_page_count = 1
+        # xin_fan_page_count = 2
         for index in xrange(1, xin_fan_page_count + 1):
             json_data = self.get_response_content(self.__construct_xin_fan_list_url(page=str(index)))
             res_dict = json.loads(json_data, encoding='utf-8')
@@ -120,7 +116,7 @@ class XinFanSpider(BarrageSpider):
             xin_fan_info_list.append((xin_fan.season_id, xin_fan.url))
 
         # 3.将所有新番的基本信息写入数据库。
-        XinFanDao.add_xin_fans(xin_fan_list)
+        # XinFanDao.add_xin_fans(xin_fan_list)
 
         # for index in xrange(0, len(xin_fan_info_list)):
         #     xin_fan = xin_fan_info_list[index]
@@ -135,10 +131,14 @@ class XinFanSpider(BarrageSpider):
             xin_fan = xin_fan_info_list[index]
             # 4. 获得新番所有剧集的av链接信息
             json_data = self.get_response_content(self.__construct_xin_fan_detail_url(xin_fan[0]))
-            anime_aid_urls = self.__get_anime_url(json_data)
-            for av_url in anime_aid_urls:
+            anime_episodes = self.__get_anime_episodes(json_data)
+            for av_episode in anime_episodes:
+                av_url = "http://www.bilibili.com/video/av" + av_episode["av_id"] + "/"
+                episode_index = av_episode["index"]
+                episode_id = av_episode["episode_id"]
                 self.bilibili_spider.start_spider_barrage(video_url=av_url, is_save_to_db=True,
-                                                          season_id=xin_fan[0], season_index=index)
+                                                          season_id=xin_fan[0], season_index=episode_index,
+                                                          episode_id=episode_id)
         return xin_fan_list
 
 

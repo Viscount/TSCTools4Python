@@ -7,6 +7,7 @@ import os
 import re
 import sched
 import time
+import json
 from multiprocessing import Pool
 
 from db.dao.barragedao import BarrageDao
@@ -78,34 +79,13 @@ class BilibiliSpider(BarrageSpider):
         return tags
 
     # 获得跟视频弹幕对应的cid信息。
-    def get_video_cid(self, html_content):
-        pattern = re.compile(r'.*?<script.*>EmbedPlayer\(\'player\',.*?"cid=(\d*)&.*?</script>', re.S)
-        match = re.search(pattern, html_content)
-        if match is not None:
-            cid = match.group(1).strip()
-            return cid
-        pattern = re.compile(r'<embed.*?class="player".*?flashvars="bili-cid=(.*?)&.*?</embed>',
-                             re.S)
-        match = re.search(pattern, html_content)
-        if match is not None:
-            cid = match.group(1).strip()
-            return cid
-        pattern = re.compile(
-            r'<div.*?id="bofqi">.*?<iframe.*?src=".*?cid=(.*?)&.*?".*?>.*?</iframe>.*?</div>', re.S)
-        match = re.search(pattern, html_content)
-        if match is not None:
-            cid = match.group(1).strip()
-            return cid
-        return u"-1"  # 找不到cid的情况
-
-    # 获得视频的id信息。
-    def get_video_aid(self, video_url):
-        pattern = re.compile(r'http://.*?/.*?/av(.*?)/.*?', re.S)
-        match = re.search(pattern, video_url)
-        if match is None:
-            return None
-        mid = match.group(1).strip()
-        return unicode(mid)
+    def get_video_ids(self, episode_id):
+        base_url = "http://bangumi.bilibili.com/web_api/episode/"
+        json_data = self.get_response_content(base_url + str(episode_id) + ".json")
+        res_dict = json.loads(json_data, encoding='utf-8')
+        av_id = res_dict["result"]["currentEpisode"]["avId"]
+        cid = res_dict["result"]["currentEpisode"]["danmaku"]
+        return av_id,cid
 
     # 构建弹幕的xml链接地址。
     def barrage_xml_url(self, cid):
@@ -219,7 +199,8 @@ class BilibiliSpider(BarrageSpider):
     #       is_corpus 写入到本地的弹幕文件是否以语料的方式存储，默认为false，不作为语料存储
     #       season_id  番剧的id信息，该字段不为null时，表示当前视频为番剧的一集
     #       season_index  当前视频为番剧的第几集
-    def start_spider_barrage(self, video_url, is_save_to_db=True, is_corpus=False, season_id=None, season_index=None):
+    def start_spider_barrage(self, video_url, is_save_to_db=True, is_corpus=False,
+                             season_id=None, season_index=None, episode_id=None):
         print u"进入 start_spider_barrage 函数。"
         # 视频网页的html源码信息。
         video_html_content = self.get_response_content(video_url)
@@ -228,8 +209,7 @@ class BilibiliSpider(BarrageSpider):
             Logger.print_console_info(u"无法获得网页html代码，请检查网址是否输入正确，或检查网络连接是否正常！！")
             return None
         # 获得视频的相关信息
-        aid = self.get_video_aid(video_url)
-        cid = self.get_video_cid(video_html_content)
+        aid,cid = self.get_video_ids(episode_id)
         tags = self.get_video_tags(video_html_content)
         title = self.get_video_title(video_html_content)
         meta_keywords = self.get_video_meta_keywords(video_html_content)
@@ -243,7 +223,7 @@ class BilibiliSpider(BarrageSpider):
             # 将视频信息存储入数据库中
             VideoDao.add_video(cid, title, tags, meta_keywords, aid, unicode(video_url), season_id, season_index)
             # 获取更新的弹幕信息。
-            barrages = self.get_refresh_video_barrage(cid, barrages)
+            # barrages = self.get_refresh_video_barrage(cid, barrages)
             BarrageDao.add_barrages(barrages, aid)
         # 将更新后的弹幕信息写入本地文件。
         self.save_barrages_to_local(cid, barrages, is_corpus)

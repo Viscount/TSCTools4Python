@@ -24,7 +24,7 @@ class VideoDao(DBUtil):
             video_info.season_index = season_index
         session = DBUtil.open_session()
         try:
-            session.add(video_info)
+            session.merge(video_info)
             session.commit()
             return True
         except Exception as e:

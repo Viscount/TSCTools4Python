@@ -19,7 +19,7 @@ class XinFanDao(DBUtil):
     def add_xin_fan(xin_fan):
         session = DBUtil.open_session()
         try:
-            session.add(xin_fan)
+            session.merge(xin_fan)
             session.commit()
             return True
         except Exception as e:
@@ -35,7 +35,7 @@ class XinFanDao(DBUtil):
         session = DBUtil.open_session()
         try:
             for xin_fan in xin_fans:
-                session.add(xin_fan)
+                session.merge(xin_fan)
             session.commit()
             return True
         except Exception as e:
