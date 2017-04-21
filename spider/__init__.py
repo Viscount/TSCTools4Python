@@ -78,19 +78,30 @@ class Spider(object):
             return resp
 
     # 获得网络回复response的内容，有可能是页面的html代码，有可能是json数据。
-    def get_response_content(self, site_url, post_data=None, headers=None):
+    def get_response_content(self, site_url, post_data=None, headers=None, try_times=2):
         if post_data is None:
             post_data = self.post_data
         if headers is None:
             headers = self.headers
         req = self.construct_req_by_post(site_url, post_data, headers)
-        resp = self.access_url(req, self.timeout)
+
+        # 如果发现有 网页数据 解码错误的情况 self.__get_response_content_internal 返回 None，那么重试
+        times = 0
+        while times < try_times:
+            resp = self.access_url(req, self.timeout)
+            response_content = self.__get_response_content_internal(resp)
+            if response_content is not None:
+                return response_content
+        return ""  # 始终解码错误，那么返回 ""，之所以不用None，是因为之前的接口返回的是""，返回None怕出现莫名其妙的错误。
+
+    # 获取网页源代码
+    def __get_response_content_internal(self, resp):
         # 获得返回网页的相关信息
         try:
             response_content = resp.read()
         except Exception as exception:
             logger.debug(unicode(exception))
-            return ""
+            return None
         resp_info = resp.info()
         if "Content-Encoding" in resp_info:
             Logger.print_console_info(
@@ -104,7 +115,7 @@ class Spider(object):
                     response_content = zlib.decompress(response_content, zlib.MAX_WBITS)
             except zlib.error as exception:
                 logger.debug(exception)
-                return ""
+                return None
         # 在这里还要加上一步，因为有些页面的html代码是由js生成并填充上去的，所以这里需要去执行html代码里面的js代码获得全部的html代码
         response_content = response_content.decode("utf-8", "ignore")
         return response_content
