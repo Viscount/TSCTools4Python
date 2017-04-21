@@ -88,8 +88,11 @@ class XinFanSpider(BarrageSpider):
     def __get_anime_episodes(self, json_data):
         json_data = json_data[19:-2]
         res_dict = json.loads(json_data, encoding='utf-8')
-        anime_episodes = res_dict["result"]["episodes"]
-        return anime_episodes  # 返回剧集的链接列表信息，或者是None
+        if "result" in res_dict:
+            anime_episodes = res_dict["result"]["episodes"]
+            return anime_episodes  # 返回剧集的链接列表信息，或者是None
+        else:
+            return None
 
     def __construct_xin_fan_detail_url(self, season_id):
         base_url_header = "http://bangumi.bilibili.com/jsonp/seasoninfo/"
@@ -122,16 +125,24 @@ class XinFanSpider(BarrageSpider):
 
         for index in xrange(0, len(xin_fan_info_list)):
             xin_fan = xin_fan_info_list[index]
+            Logger.print_console_info(u"第" + str(index) + u"次抓取-网页地址:" + xin_fan[0])
             # 获得新番所有剧集的av链接信息
             json_data = self.get_response_content(self.__construct_xin_fan_detail_url(xin_fan[0]))
-            anime_episodes = self.__get_anime_episodes(json_data)
+            try_times = 5
+            while try_times>0:
+                anime_episodes = self.__get_anime_episodes(json_data)
+                if anime_episodes is not None:
+                    break
+                else:
+                    try_times -= 1
             for av_episode in anime_episodes:
                 av_url = "http://www.bilibili.com/video/av" + av_episode["av_id"] + "/"
                 episode_index = av_episode["index"]
                 episode_id = av_episode["episode_id"]
+                episode_title = av_episode["index_title"]
                 self.bilibili_spider.start_spider_barrage(video_url=av_url, is_save_to_db=True,
                                                           season_id=xin_fan[0], season_index=episode_index,
-                                                          episode_id=episode_id)
+                                                          episode_id=episode_id, episode_title=episode_title)
         return xin_fan_list
 
 

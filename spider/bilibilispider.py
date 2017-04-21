@@ -83,9 +83,12 @@ class BilibiliSpider(BarrageSpider):
         base_url = "http://bangumi.bilibili.com/web_api/episode/"
         json_data = self.get_response_content(base_url + str(episode_id) + ".json")
         res_dict = json.loads(json_data, encoding='utf-8')
-        av_id = res_dict["result"]["currentEpisode"]["avId"]
-        cid = res_dict["result"]["currentEpisode"]["danmaku"]
-        return av_id,cid
+        if "result" in res_dict:
+            av_id = res_dict["result"]["currentEpisode"]["avId"]
+            cid = res_dict["result"]["currentEpisode"]["danmaku"]
+            return av_id,cid
+        else:
+            return None,None
 
     # 构建弹幕的xml链接地址。
     def barrage_xml_url(self, cid):
@@ -200,7 +203,7 @@ class BilibiliSpider(BarrageSpider):
     #       season_id  番剧的id信息，该字段不为null时，表示当前视频为番剧的一集
     #       season_index  当前视频为番剧的第几集
     def start_spider_barrage(self, video_url, is_save_to_db=True, is_corpus=False,
-                             season_id=None, season_index=None, episode_id=None):
+                             season_id=None, season_index=None, episode_id=None, episode_title=None):
         print u"进入 start_spider_barrage 函数。"
         # 视频网页的html源码信息。
         video_html_content = self.get_response_content(video_url)
@@ -209,9 +212,18 @@ class BilibiliSpider(BarrageSpider):
             Logger.print_console_info(u"无法获得网页html代码，请检查网址是否输入正确，或检查网络连接是否正常！！")
             return None
         # 获得视频的相关信息
-        aid,cid = self.get_video_ids(episode_id)
+        try_times = 5
+        while try_times>0:
+            aid,cid = self.get_video_ids(episode_id)
+            if (aid is not None) & (cid is not None):
+                break
+            else:
+                try_times -= 1
+        if (aid is None) & (cid is None):
+            Logger.print_console_info(u"获取视频av_id和cid失败")
+            return
         tags = self.get_video_tags(video_html_content)
-        title = self.get_video_title(video_html_content)
+        title = episode_title
         meta_keywords = self.get_video_meta_keywords(video_html_content)
 
         # 获取弹幕信息。
