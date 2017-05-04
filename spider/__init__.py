@@ -92,6 +92,8 @@ class Spider(object):
             response_content = self.__get_response_content_internal(resp)
             if response_content is not None:
                 return response_content
+            else:
+                times += 1
         return ""  # 始终解码错误，那么返回 ""，之所以不用None，是因为之前的接口返回的是""，返回None怕出现莫名其妙的错误。
 
     # 获取网页源代码

@@ -135,6 +135,8 @@ class XinFanSpider(BarrageSpider):
                     break
                 else:
                     try_times -= 1
+            if anime_episodes is None:
+                continue
             for av_episode in anime_episodes:
                 av_url = "http://www.bilibili.com/video/av" + av_episode["av_id"] + "/"
                 episode_index = av_episode["index"]
