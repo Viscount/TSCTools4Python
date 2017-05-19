@@ -13,6 +13,7 @@ from spider import BarrageSpider
 from util.loggerutil import Logger
 import json
 import math
+import time
 from db.model.xinfan import XinFan
 import re
 from db.dao.xinfandao import XinFanDao
@@ -27,7 +28,7 @@ class XinFanSpider(BarrageSpider):
     def __init__(self):
         super(XinFanSpider, self).__init__()
         # b站新番列表的获取api链接 'http://bangumi.bilibili.com/web_api/season/index?page=1&version=0&index_type=0&pagesize=30'
-        self.xin_fan_base_url = 'http://bangumi.bilibili.com/web_api/season/index'
+        self.xin_fan_base_url = 'http://bangumi.bilibili.com/web_api/season/index_global'
         self.page_size = 30  # 每一个新番页面对应的新番个数
         self.bilibili_spider = BilibiliSpider()
 
@@ -36,8 +37,8 @@ class XinFanSpider(BarrageSpider):
     #      page_size 每一个页面显示多少新番，这个数b站一致默认是30，不用改变
     def __construct_xin_fan_list_url(self, page, page_size=30):
         if page is None:
-            return 'http://bangumi.bilibili.com/web_api/season/index?page=1&version=0&index_type=0&pagesize=30'
-        return self.xin_fan_base_url + '?page=' + str(page) + '&version=0&index_type=0&pagesize=' + str(page_size)
+            return 'http://bangumi.bilibili.com/web_api/season/index?page=1&version=0&index_type=0&index_sort=0&pagesize=30'
+        return self.xin_fan_base_url + '?page=' + str(page) + '&version=0&index_type=0&index_sort=0&pagesize=' + str(page_size)
 
     # 获取新番列表的总页数
     def __get_xin_fan_page_count(self, xin_fan_count, page_size=30):
@@ -145,6 +146,7 @@ class XinFanSpider(BarrageSpider):
                 self.bilibili_spider.start_spider_barrage(video_url=av_url, is_save_to_db=True,
                                                           season_id=xin_fan[0], season_index=episode_index,
                                                           episode_id=episode_id, episode_title=episode_title)
+                time.sleep(1)
         return xin_fan_list
 
 
